@@ -140,12 +140,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="common.cpp" />
+    <ClCompile Include="game-control.cpp" />
     <ClCompile Include="mci-sound.cpp" />
     <ClCompile Include="select-panel.cpp" />
     <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h" />
+    <ClInclude Include="game-control.h" />
     <ClInclude Include="mci-sound.h" />
     <ClInclude Include="select-panel.h" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 ﻿#include "common.h"
 #include "mci-sound.h"
 #include "select-panel.h"
+#include "game-control.h"
 
 HDC main_hdc, canvas_hdc;
 
@@ -26,16 +27,20 @@ int main()
 
 	while (_kbhit() != 27) {
 		EnumSelectResult select_result = show_select_panel(); // 游戏结束之后继续进行模式选择
+		game_control_init(); 
+		game_control_show_stage(); // 显示关卡信息
 
 		switch (select_result)
 		{
 		case OnePlayer:
-			// 添加玩家
+			// 添加玩家，将一个玩家对象添加到链表中
 
-			// 加载地图
+			// 加载地图，读取地图文件数据，现在简化直接创建地图数组变量map
+			game_control_start_game();
 
 			// 进入地图
 
+			while (1);
 			break;
 		case TwoPlayer:
 			break;
