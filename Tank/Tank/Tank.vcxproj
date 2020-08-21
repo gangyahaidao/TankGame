@@ -144,6 +144,8 @@
     <ClCompile Include="game-control.cpp" />
     <ClCompile Include="mci-sound.cpp" />
     <ClCompile Include="select-panel.cpp" />
+    <ClCompile Include="tank-common.cpp" />
+    <ClCompile Include="tank-player.cpp" />
     <ClCompile Include="Tank.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -152,6 +154,8 @@
     <ClInclude Include="game-control.h" />
     <ClInclude Include="mci-sound.h" />
     <ClInclude Include="select-panel.h" />
+    <ClInclude Include="tank-common.h" />
+    <ClInclude Include="tank-player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,7 @@
 #include "common.h"
 #include "game-control.h"
 #include "game-clock.h"
+#include "tank-player.h"
 
 extern HDC main_hdc, canvas_hdc;
 extern IMAGE mGrayBackgroundImage;		// 游戏灰色背景图
@@ -31,8 +32,10 @@ IMAGE mGameOverImage;
 int mRemainEnemyTankNumber = 20;		// 余下未显示的敌机数量, 初始值=20, 出现一架敌机该值减一
 
 int mPlayerLife = 3; // 玩家默认生命值为3
-
 int mCurrentStage = 1; // 当前关卡
+
+TankPlayer tankPlayer1;
+
 const char* map[] = { // 第一关地图数据，0空地、1深林、2冰、3墙、4河流、5石头
 		"00000000000000000000000000",
 		"00000000000000000000000000",
@@ -221,6 +224,7 @@ void game_control_right_panel() {
 void game_control_loop() {
 	GameResult result = Victory;
 
+	tank_player_init(&tankPlayer1, 0, 4*16+BOX_SIZE, 12*16+BOX_SIZE, 240, 137);
 	// 定时器初始化
 	clock_init(&mainTimer, 14); // 主窗口14ms刷新一次
 
