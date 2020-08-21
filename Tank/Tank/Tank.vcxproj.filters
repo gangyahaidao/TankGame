@@ -30,6 +30,9 @@
     <ClCompile Include="game-control.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="game-clock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common.h">
@@ -42,6 +45,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="game-control.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="game-clock.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

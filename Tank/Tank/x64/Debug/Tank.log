@@ -1,4 +1,7 @@
-﻿  game-control.cpp
+﻿  game-clock.cpp
+E:\ubuntu-sys\git\TankGame\Tank\Tank\game-clock.cpp(14,51): warning C4244: “=”: 从“LONGLONG”转换到“double”，可能丢失数据
+  game-control.cpp
   select-panel.cpp
+  Tank.cpp
   正在生成代码...
   Tank.vcxproj -> E:\ubuntu-sys\git\TankGame\Tank\x64\Debug\Tank.exe

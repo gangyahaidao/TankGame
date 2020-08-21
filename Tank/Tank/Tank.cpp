@@ -36,11 +36,7 @@ int main()
 			// 添加玩家，将一个玩家对象添加到链表中
 
 			// 加载地图，读取地图文件数据，现在简化直接创建地图数组变量map
-			game_control_start_game();
-
-			// 进入地图
-
-			while (1);
+			game_control_loop();
 			break;
 		case TwoPlayer:
 			break;

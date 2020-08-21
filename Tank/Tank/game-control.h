@@ -28,3 +28,8 @@ void game_control_right_panel();
 	加载地图进行绘制
 */
 void game_control_center_panel();
+
+/**
+	开始游戏循环体
+*/
+void game_control_loop();

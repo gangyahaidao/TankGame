@@ -1,9 +1,12 @@
 #include "common.h"
 #include "game-control.h"
+#include "game-clock.h"
 
 extern HDC main_hdc, canvas_hdc;
 extern IMAGE mGrayBackgroundImage;		// 游戏灰色背景图
 extern IMAGE mBlackNumberImage;		// 0123456789 当前关卡数
+
+extern TimeClock mainTimer; // 用于主窗口程序的界面定时绘制
 
 IMAGE center_img; // 用于保持center_hdc存在的有效性
 HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
@@ -139,6 +142,9 @@ void game_control_show_stage() {
 void game_control_center_panel() {
 	BitBlt(center_hdc, 0, 0, CENTER_WIDTH, CENTER_HEIGHT, GetImageHDC(&mBlackBackgroundImage), 0, 0, SRCCOPY);// 中心黑色背景游戏区
 
+	// 四角星闪烁控制
+
+	// 开始绘制地图
 	int i = 0, j = 0;
 	int x = 0, y = 0;
 	for (i = 0; i < 26; i++) {
@@ -210,18 +216,46 @@ void game_control_right_panel() {
 }
 
 /**
-	开始游戏循环体：进行界面玩家、子弹、敌机、其他所有信息的更新
+	开始游戏循环体
+*/
+void game_control_loop() {
+	GameResult result = Victory;
+
+	// 定时器初始化
+	clock_init(&mainTimer, 14); // 主窗口14ms刷新一次
+
+	while (result != Fail) {
+		result = game_control_start_game();
+		Sleep(1);
+	}
+}
+
+/**
+	进行界面玩家、子弹、敌机、其他所有信息的更新
 */
 GameResult game_control_start_game() {
-	game_control_center_panel(); // 绘制中间游戏主体区域
-	game_control_right_panel(); // 绘制右边信息栏
+	if (clock_is_timeout(&mainTimer)) {
+		printf("clock timeout\n");
 
-	// 将中间绘图区center_hdc绘制到画布canvas_hdc上
-	BitBlt(canvas_hdc, CENTER_X, CENTER_Y, CENTER_WIDTH, CENTER_HEIGHT, center_hdc, 0, 0, SRCCOPY);
-	// 将整个canvas_hdc缩放显示到main主窗口上
-	StretchBlt(main_hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-		canvas_hdc, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SRCCOPY);
-	FlushBatchDraw();
+		// 胜利或者失败，显示分数面板
+
+		// 如果失败，上升GAME OVER字样
+
+		// 添加敌机坦克
+
+		// 绘制中间游戏主体区域
+		game_control_center_panel();
+
+		// 绘制右边信息栏
+		game_control_right_panel();
+
+		// 将中间绘图区center_hdc绘制到画布canvas_hdc上
+		BitBlt(canvas_hdc, CENTER_X, CENTER_Y, CENTER_WIDTH, CENTER_HEIGHT, center_hdc, 0, 0, SRCCOPY);
+		// 将整个canvas_hdc缩放显示到main主窗口上
+		StretchBlt(main_hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+			canvas_hdc, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SRCCOPY);
+		FlushBatchDraw();
+	}
 
 	return Victory;
 }
