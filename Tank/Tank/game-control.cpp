@@ -235,7 +235,6 @@ void game_control_loop() {
 */
 GameResult game_control_start_game() {
 	if (clock_is_timeout(&mainTimer)) {
-		printf("clock timeout\n");
 
 		// 胜利或者失败，显示分数面板
 
