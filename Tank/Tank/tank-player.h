@@ -12,11 +12,20 @@ typedef enum {
 	DIR_DOWN
 }TANK_DIDIR;
 
+// 玩家坦克出生保护环
+typedef struct {
+	IMAGE protecImage[2]; // 保护环图片
+	bool needShow; // 是否需要显示保护环
+	int imageIndex; // 图片下标
+	int timerCount; // 计时器次数
+}ProtecCircle;
+
 struct TankPlayer {
 	bool mDied; // 玩家生命值是否用完
 	byte playerId; // 玩家ID：0/1
 	byte mTankLevel; // 坦克等级[1-4]
-	IMAGE mTankImage[4][4][2]; // 四种级别四个方向，每个方向两个样式实现坦克履带转动的效果
+	IMAGE mTankImage[4][4][2]; // 四种级别，四个方向，每个方向两个样式实现坦克履带转动的效果
+	bool mTankMoving; // 坦克是否在移动，用于获取同一个方向不同张坦克图片，行走时进行切换，具有动态效果
 	int tankPlayerX, tankPlayerY; // 坦克中心点坐标
 	int tankWidth, tankHeight; // 坦克的长和宽
 	TANK_DIDIR tankDir; // 坦克方向0-左、1-上、2-右、3-下，跟资源图片对应
@@ -26,7 +35,7 @@ struct TankPlayer {
 		mPlayerIconLife_y;
 
 	StarFourPoint mStar;			// 四角星闪烁类
-	// RingClass mRing;				// 保护圈类，四角星出现之后加载保护圈
+	ProtecCircle mProtecCircle;				// 保护圈类，四角星出现之后加载保护圈
 	// PropClass mProp;				// 道具类
 
 	int mMoveSpeedDev[4] = {21, 19, 17, 15};	// 四个级别坦克移动时间间隔
@@ -46,4 +55,9 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 /**
 	玩家坦克四角星闪烁，只有在进入新关卡第一次时才会出现四角星，游戏中重生只会出现保护圈
 */
-Star_State tank_player_show_star(TankPlayer* tankPlayer);
+void tank_player_show_star(TankPlayer* tankPlayer);
+
+/**
+	绘制玩家坦克
+*/
+void tank_player_draw_tank(TankPlayer* tankPlayer);

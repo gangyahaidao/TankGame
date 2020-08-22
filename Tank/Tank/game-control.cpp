@@ -147,6 +147,8 @@ void game_control_center_panel() {
 
 	// 玩家四角星闪烁控制
 	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
+	// 玩家出生保护环显示
+	tank_player_draw_tank(&tankPlayer0);
 
 	// 开始绘制地图
 	int i = 0, j = 0;

@@ -13,6 +13,7 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	tankPlayer->mDied = false;
 	tankPlayer->playerId = playerID;
 	tankPlayer->mTankLevel = 1;
+	tankPlayer->mTankMoving = false;
 
 	// 填充不同级别坦克、方向对应的图片资源
 	int level, dir;
@@ -60,6 +61,17 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	tankPlayer->mStar.mStarIndex = 0;
 	tankPlayer->mStar.mStarIndexDir = 1; // 初始下标是由小变大
 
+	// 初始化保护环
+	TCHAR cir_buf[100];
+	for (int i = 0; i < 2; i++)
+	{
+		_stprintf_s(cir_buf, _T("./res/big/ring%d.gif"), i);
+		loadimage(&tankPlayer->mProtecCircle.protecImage[i], cir_buf);
+	}	
+	tankPlayer->mProtecCircle.needShow = true;
+	tankPlayer->mProtecCircle.imageIndex = 0;
+	tankPlayer->mProtecCircle.timerCount = 0;
+
 	// 初始化坦克移动、子弹速度、爆炸速度计数器
 	clock_init(&tankPlayer->mTankMoveTimer, tankPlayer->mMoveSpeedDev[tankPlayer->mTankLevel]);
 	clock_init(&tankPlayer->mBulletTimer, tankPlayer->mBulletSpeedDev[tankPlayer->mTankLevel]);
@@ -70,9 +82,9 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 /**
 	玩家坦克四角星闪烁，只有在进入新关卡第一次时才会出现四角星，游戏中重生只会出现保护圈
 */
-Star_State tank_player_show_star(TankPlayer* tankPlayer) {
+void tank_player_show_star(TankPlayer* tankPlayer) {
 	if (tankPlayer->mStar.starState == Star_End) { // 如果坦克已经出现则不显示四角星
-		return Star_End;
+		return;
 	}
 
 	if (tankPlayer->mStar.mStarCounter % 2 == 0) { // 主循环如果是偶数次计数，则切四角星图片
@@ -87,7 +99,7 @@ Star_State tank_player_show_star(TankPlayer* tankPlayer) {
 	}
 	if (tankPlayer->mStar.mStarCounter++ > 25) {
 		tankPlayer->mStar.starState = Star_End; // 四角星闪烁完成
-		return Star_End;
+		return;
 	}
 
 	// 按照计算的下标进行四角星图片绘制
@@ -96,6 +108,43 @@ Star_State tank_player_show_star(TankPlayer* tankPlayer) {
 		GetImageHDC(&tankPlayer->mStar.mStarImage[tankPlayer->mStar.mStarIndex]),
 		0, 0, BOX_SIZE * 2, BOX_SIZE * 2,
 		0x000000);
+}
 
-	return Star_Showing;
+/**
+	绘制玩家坦克
+*/
+void tank_player_draw_tank(TankPlayer* tankPlayer) {
+	if (tankPlayer->mStar.starState != Star_End) { // 如果还在绘制四角星则返回
+		return;
+	}
+
+	int dirIndex = 0;
+	if (tankPlayer->mTankMoving) { // 如果坦克在移动，则进行同一方向图片切换实现动态履带效果
+		dirIndex = dirIndex == 0 ? 1 : 0;
+	}
+	IMAGE tank = tankPlayer->mTankImage[tankPlayer->mTankLevel][tankPlayer->tankDir][dirIndex];
+	TransparentBlt(center_hdc, tankPlayer->tankPlayerX - BOX_SIZE, tankPlayer->tankPlayerY - BOX_SIZE,
+		BOX_SIZE * 2, BOX_SIZE * 2,
+		GetImageHDC(&tank),
+		0, 0,
+		BOX_SIZE * 2, BOX_SIZE * 2,
+		0x000000);
+
+	// 判断是否显示出生保护环
+	if (tankPlayer->mProtecCircle.needShow) {
+		tankPlayer->mProtecCircle.timerCount++;
+		if (tankPlayer->mProtecCircle.timerCount > 215) { // 保护圈有效时间到
+			tankPlayer->mProtecCircle.needShow = false;
+			tankPlayer->mProtecCircle.timerCount = 0;
+		}
+		else {
+			tankPlayer->mProtecCircle.imageIndex = tankPlayer->mProtecCircle.timerCount / 4 % 2; // 每隔一定时间再进行图片切换，相当于每循环四个周期进行切换
+			TransparentBlt(center_hdc, tankPlayer->tankPlayerX - BOX_SIZE, tankPlayer->tankPlayerY - BOX_SIZE,
+				BOX_SIZE * 2, BOX_SIZE * 2,
+				GetImageHDC(&tankPlayer->mProtecCircle.protecImage[tankPlayer->mProtecCircle.imageIndex]),
+				0, 0,
+				BOX_SIZE * 2, BOX_SIZE * 2,
+				0x000000);
+		}		
+	}
 }

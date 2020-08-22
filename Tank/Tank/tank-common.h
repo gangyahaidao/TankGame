@@ -6,11 +6,8 @@
 // 四角星闪烁，敌机或者玩家的四角星闪烁返回类型
 enum Star_State {
 	Star_Begin,			// 四角星刚刚出现
-	Star_Showing,		// 正在闪烁四角星
 	Star_End			// 坦克已经出现
 };
-
-
 typedef struct {
 	IMAGE mStarImage[4]; // 四张四角星图片
 	int mStarIndex; // 数组下标
@@ -18,3 +15,4 @@ typedef struct {
 	int mStarCounter; // 计数，多长次循环变更一次图像
 	Star_State starState;				// 四角星消失的时候坦克出现, 停止播放四角星闪烁图
 }StarFourPoint;
+
