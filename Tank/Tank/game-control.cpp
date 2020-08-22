@@ -34,7 +34,7 @@ int mRemainEnemyTankNumber = 20;		// 余下未显示的敌机数量, 初始值=20, 出现一架敌
 int mPlayerLife = 3; // 玩家默认生命值为3
 int mCurrentStage = 1; // 当前关卡
 
-TankPlayer tankPlayer1;
+TankPlayer tankPlayer0;
 
 const char* map[] = { // 第一关地图数据，0空地、1深林、2冰、3墙、4河流、5石头
 		"00000000000000000000000000",
@@ -145,7 +145,8 @@ void game_control_show_stage() {
 void game_control_center_panel() {
 	BitBlt(center_hdc, 0, 0, CENTER_WIDTH, CENTER_HEIGHT, GetImageHDC(&mBlackBackgroundImage), 0, 0, SRCCOPY);// 中心黑色背景游戏区
 
-	// 四角星闪烁控制
+	// 玩家四角星闪烁控制
+	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
 
 	// 开始绘制地图
 	int i = 0, j = 0;
@@ -224,9 +225,11 @@ void game_control_right_panel() {
 void game_control_loop() {
 	GameResult result = Victory;
 
-	tank_player_init(&tankPlayer1, 0, 4*16+BOX_SIZE, 12*16+BOX_SIZE, 240, 137);
+	// 初始化玩家0的结构体
+	tank_player_init(&tankPlayer0, 0, 4*16+BOX_SIZE, 12*16+BOX_SIZE, 240, 137);
+
 	// 定时器初始化
-	clock_init(&mainTimer, 14); // 主窗口14ms刷新一次
+	clock_init(&mainTimer, 15); // 主窗口15ms刷新一次
 
 	while (result != Fail) {
 		result = game_control_start_game();

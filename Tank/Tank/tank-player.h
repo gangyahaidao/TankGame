@@ -6,13 +6,13 @@
 #define BOMB_SPEED 20 // 炮弹爆炸速度
 
 typedef enum {
-	LEFT,
-	UP,
-	RIGHT,
-	DOWN
+	DIR_LEFT,
+	DIR_UP,
+	DIR_RIGHT,
+	DIR_DOWN
 }TANK_DIDIR;
 
-typedef struct {
+struct TankPlayer {
 	bool mDied; // 玩家生命值是否用完
 	byte playerId; // 玩家ID：0/1
 	byte mTankLevel; // 坦克等级[1-4]
@@ -34,8 +34,7 @@ typedef struct {
 	TimeClock mTankMoveTimer;		// 坦克移动速度
 	TimeClock mBulletTimer;		// 子弹移动速度
 	TimeClock mBombTimer;		// 子弹爆炸速度	
-
-}TankPlayer;
+};
 
 /**
 	对玩家坦克资源进行初始化
@@ -43,3 +42,8 @@ typedef struct {
 void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	int tankX, int tankY,
 	int iconLife_x, int iconLife_y);
+
+/**
+	玩家坦克四角星闪烁，只有在进入新关卡第一次时才会出现四角星，游戏中重生只会出现保护圈
+*/
+Star_State tank_player_show_star(TankPlayer* tankPlayer);
