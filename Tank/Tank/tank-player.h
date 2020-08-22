@@ -10,7 +10,7 @@ typedef enum {
 	DIR_UP,
 	DIR_RIGHT,
 	DIR_DOWN
-}TANK_DIDIR;
+}TANK_DIR;
 
 // 玩家坦克出生保护环
 typedef struct {
@@ -25,10 +25,11 @@ struct TankPlayer {
 	byte playerId; // 玩家ID：0/1
 	byte mTankLevel; // 坦克等级[1-4]
 	IMAGE mTankImage[4][4][2]; // 四种级别，四个方向，每个方向两个样式实现坦克履带转动的效果
+	byte mTankImageDirIndex = 0; // 同一个方向的不同图像下标
 	bool mTankMoving; // 坦克是否在移动，用于获取同一个方向不同张坦克图片，行走时进行切换，具有动态效果
 	int tankPlayerX, tankPlayerY; // 坦克中心点坐标
 	int tankWidth, tankHeight; // 坦克的长和宽
-	TANK_DIDIR tankDir; // 坦克方向0-左、1-上、2-右、3-下，跟资源图片对应
+	TANK_DIR tankDir; // 坦克方向0-左、1-上、2-右、3-下，跟资源图片对应
 
 	int mPlayerLife; // 玩家默认生命值为3
 	int mPlayerIconLife_x, 						// 图标坐标
@@ -36,7 +37,7 @@ struct TankPlayer {
 
 	StarFourPoint mStar;			// 四角星闪烁类
 	ProtecCircle mProtecCircle;				// 保护圈类，四角星出现之后加载保护圈
-	// PropClass mProp;				// 道具类
+	BulletStruct mBullet;				// 炮弹类
 
 	int mMoveSpeedDev[4] = {21, 19, 17, 15};	// 四个级别坦克移动时间间隔
 	int mBulletSpeedDev[4] = {17, 16, 15, 14 };	// 不同级别子弹时间间隔速度
@@ -61,3 +62,8 @@ void tank_player_show_star(TankPlayer* tankPlayer);
 	绘制玩家坦克
 */
 void tank_player_draw_tank(TankPlayer* tankPlayer);
+
+/**
+	玩家坦克基于定时器移动
+*/
+void tank_player_move_by_tanktimer(TankPlayer* tankPlayer);

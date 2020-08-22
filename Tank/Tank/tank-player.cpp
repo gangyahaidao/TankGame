@@ -77,6 +77,14 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	clock_init(&tankPlayer->mBulletTimer, tankPlayer->mBulletSpeedDev[tankPlayer->mTankLevel]);
 	clock_init(&tankPlayer->mBombTimer, BOMB_SPEED);
 
+	// 加载炮弹图片资源
+	TCHAR bulletBuf[100];
+	for (int i = 0; i < 4; i++)
+	{
+		_stprintf_s(bulletBuf, _T("./res/big/bullet-%d.gif"), i);
+		loadimage(&tankPlayer->mBullet.mImage[i], bulletBuf);
+	}
+	tankPlayer->mBullet.needDraw = false;
 }
 
 /**
@@ -118,14 +126,14 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 		return;
 	}
 
-	int dirIndex = 0;
+	// 先绘制玩家坦克，再绘制保护环
 	if (tankPlayer->mTankMoving) { // 如果坦克在移动，则进行同一方向图片切换实现动态履带效果
-		dirIndex = dirIndex == 0 ? 1 : 0;
+		tankPlayer->mTankImageDirIndex = tankPlayer->mTankImageDirIndex == 0 ? 1 : 0;
 	}
-	IMAGE tank = tankPlayer->mTankImage[tankPlayer->mTankLevel][tankPlayer->tankDir][dirIndex];
+	IMAGE tankImg = tankPlayer->mTankImage[tankPlayer->mTankLevel][tankPlayer->tankDir][tankPlayer->mTankImageDirIndex];
 	TransparentBlt(center_hdc, tankPlayer->tankPlayerX - BOX_SIZE, tankPlayer->tankPlayerY - BOX_SIZE,
 		BOX_SIZE * 2, BOX_SIZE * 2,
-		GetImageHDC(&tank),
+		GetImageHDC(&tankImg),
 		0, 0,
 		BOX_SIZE * 2, BOX_SIZE * 2,
 		0x000000);
@@ -133,7 +141,7 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 	// 判断是否显示出生保护环
 	if (tankPlayer->mProtecCircle.needShow) {
 		tankPlayer->mProtecCircle.timerCount++;
-		if (tankPlayer->mProtecCircle.timerCount > 215) { // 保护圈有效时间到
+		if (tankPlayer->mProtecCircle.timerCount > 215) { // 保护圈有效时间到15*215ms
 			tankPlayer->mProtecCircle.needShow = false;
 			tankPlayer->mProtecCircle.timerCount = 0;
 		}
@@ -146,5 +154,33 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 				BOX_SIZE * 2, BOX_SIZE * 2,
 				0x000000);
 		}		
+	}
+
+	if (tankPlayer->mBullet.needDraw) { // 判断是否需要绘制炮弹
+
+	}
+}
+
+/**
+	玩家坦克基于定时器移动
+*/
+void tank_player_move_by_tanktimer(TankPlayer* tankPlayer) {
+	if (clock_is_timeout(&tankPlayer->mTankMoveTimer)) { // 坦克定时器时间到，才开始移动
+		switch (tankPlayer->tankDir) {
+		case DIR_LEFT:
+			tankPlayer->tankPlayerX += -1;
+			break;
+		case DIR_UP:
+			tankPlayer->tankPlayerY += -1;
+			break;
+		case DIR_RIGHT:
+			tankPlayer->tankPlayerX += 1;
+			break;
+		case DIR_DOWN:
+			tankPlayer->tankPlayerY += 1;
+			break;
+		default:
+			break;
+		}
 	}
 }

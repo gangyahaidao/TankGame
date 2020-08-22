@@ -19,7 +19,8 @@
 #define S_WIN		11 // 胜利
 #define S_FAIL		12 // 失败
 #define S_PLAYER_BOMB	13 // 队友爆炸
-#define S_PLAYER_MOVE	14 // 队友移动
+#define S_PLAYER_MOVE	14 // 玩家坦克移动
+#define S_PLAYER_STOP_MOVE 15 // 玩家坦克停止移动
 
 /**
 	初始化音效资源

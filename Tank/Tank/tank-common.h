@@ -16,3 +16,12 @@ typedef struct {
 	Star_State starState;				// 四角星消失的时候坦克出现, 停止播放四角星闪烁图
 }StarFourPoint;
 
+typedef struct bullet_struct{
+	int posX, posY; // 炮弹当前坐标
+	int dir; // 炮弹方向
+	int speed[4] = {2, 3, 3, 4}; // 坦克不同级别对用不同的子弹速度，但是每次移动不跨过4个像素点，不然会有击中BUG
+	int mKillID; // 记录击中的玩家/敌机ID
+	IMAGE mImage[4]; // 炮弹图片资源
+	int bulletSize[4][2]; // 左右：4*3   上下：3*4   
+	bool needDraw; // 是否需要在指定坐标绘制炮弹
+}BulletStruct;

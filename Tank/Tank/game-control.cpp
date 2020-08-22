@@ -151,10 +151,9 @@ void game_control_center_panel() {
 	tank_player_draw_tank(&tankPlayer0);
 
 	// 开始绘制地图
-	int i = 0, j = 0;
 	int x = 0, y = 0;
-	for (i = 0; i < 26; i++) {
-		for (j = 0; j < 26; j++) {
+	for (int i = 0; i < 26; i++) {
+		for (int j = 0; j < 26; j++) {
 			x = j * BOX_SIZE;
 			y = i * BOX_SIZE;
 			switch (map[i][j]-'0') {
@@ -173,8 +172,16 @@ void game_control_center_panel() {
 			default:
 				break;
 			}
+		}
+	}
 
-			// 绘制森林
+	// 检测被销毁的障碍物，绘制黑色图片进行擦除
+
+
+
+	// 绘制森林，森林可以覆盖在坦克上
+	for (int i = 0; i < 26; i++) {
+		for (int j = 0; j < 26; j++) {
 			if ((map[i][j] - '0') == _FOREST) {
 				TransparentBlt(center_hdc, x, y, BOX_SIZE, BOX_SIZE, GetImageHDC(&mForestImage), 0, 0, BOX_SIZE, BOX_SIZE, 0x000000);
 			}
@@ -232,6 +239,7 @@ void game_control_loop() {
 
 	// 定时器初始化
 	clock_init(&mainTimer, 15); // 主窗口15ms刷新一次
+	clock_init(&tankPlayer0.mTankMoveTimer, tankPlayer0.mBulletSpeedDev[tankPlayer0.mTankLevel]); // 设置坦克移动定时器，定时移动固定距离
 
 	while (result != Fail) {
 		result = game_control_start_game();
@@ -263,6 +271,50 @@ GameResult game_control_start_game() {
 		StretchBlt(main_hdc, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
 			canvas_hdc, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, SRCCOPY);
 		FlushBatchDraw();
+	}
+
+	// 以下操作只更新坦克数据，不进行绘图，绘图在mainTimer中统一绘制
+	// 接收键盘控制，注意：不在主循环定时器中，可以实时控制
+	if (GetAsyncKeyState('A') & 0x8000) { // 向左		
+		tankPlayer0.tankDir = DIR_LEFT;
+		if (tankPlayer0.mTankMoving == false) {
+			PlaySounds(S_PLAYER_MOVE);
+		}		
+		tankPlayer0.mTankMoving = true;
+		tank_player_move_by_tanktimer(&tankPlayer0);
+	}
+	else if (GetAsyncKeyState('W') & 0x8000) {
+		tankPlayer0.tankDir = DIR_UP;
+		if (tankPlayer0.mTankMoving == false) {
+			PlaySounds(S_PLAYER_MOVE);
+		}
+		tankPlayer0.mTankMoving = true;
+		tank_player_move_by_tanktimer(&tankPlayer0);
+	}
+	else if (GetAsyncKeyState('D') & 0x8000) {
+		tankPlayer0.tankDir = DIR_RIGHT;
+		if (tankPlayer0.mTankMoving == false) {
+			PlaySounds(S_PLAYER_MOVE);
+		}
+		tankPlayer0.mTankMoving = true;
+		tank_player_move_by_tanktimer(&tankPlayer0);
+	}
+	else if (GetAsyncKeyState('S') & 0x8000) {
+		tankPlayer0.tankDir = DIR_DOWN;
+		if (tankPlayer0.mTankMoving == false) {
+			PlaySounds(S_PLAYER_MOVE);
+		}
+		tankPlayer0.mTankMoving = true;
+		tank_player_move_by_tanktimer(&tankPlayer0);
+	}
+	else if(tankPlayer0.mTankMoving == true) { // 如果没有按方向键，则暂停播放移动背景音
+		tankPlayer0.mTankMoving = false;
+		PlaySounds(S_PLAYER_STOP_MOVE);
+	}
+
+	// 判断是否在发射炮弹
+	if (GetAsyncKeyState('J') & 0x8000) {
+		PlaySounds(S_SHOOT0);
 	}
 
 	return Victory;

@@ -104,7 +104,9 @@ void PlaySounds(int kind) {
 	case S_PLAYER_MOVE:
 		mciSendString(_T("play player_move from 0"), NULL, 0, NULL);
 		break;
-
+	case S_PLAYER_STOP_MOVE:
+		mciSendString(_T("pause player_move"), NULL, 0, NULL);
+		break;
 	default:
 		break;
 	}
