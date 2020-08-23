@@ -12,7 +12,7 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 {	
 	tankPlayer->mDied = false;
 	tankPlayer->playerId = playerID;
-	tankPlayer->mTankLevel = 1;
+	tankPlayer->mTankLevel = 0; // 从0开始
 	tankPlayer->mTankMoving = false;
 
 	// 填充不同级别坦克、方向对应的图片资源
@@ -156,9 +156,15 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 		}		
 	}
 
-	if (tankPlayer->mBullet.needDraw) { // 判断是否需要绘制炮弹
-
-	}
+	// 绘制玩家坦克炮弹
+	int dir = tankPlayer->mBullet.dir;
+	TransparentBlt(center_hdc,
+		tankPlayer->mBullet.posX+tankPlayer->mBullet.bullet_bias[dir][0], tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1],
+		tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
+		GetImageHDC(&tankPlayer->mBullet.mImage[tankPlayer->mBullet.dir]),
+		0, 0,
+		tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
+		0x000000);
 }
 
 /**

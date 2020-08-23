@@ -147,8 +147,17 @@ void game_control_center_panel() {
 
 	// 玩家四角星闪烁控制
 	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
-	// 玩家出生保护环显示
+
+	// 绘制玩家坦克、出生保护环
 	tank_player_draw_tank(&tankPlayer0);
+
+	// 绘制敌机
+
+	
+	
+	// 绘制敌机炮弹
+
+
 
 	// 开始绘制地图
 	int x = 0, y = 0;
@@ -175,10 +184,6 @@ void game_control_center_panel() {
 		}
 	}
 
-	// 检测被销毁的障碍物，绘制黑色图片进行擦除
-
-
-
 	// 绘制森林，森林可以覆盖在坦克上
 	for (int i = 0; i < 26; i++) {
 		for (int j = 0; j < 26; j++) {
@@ -187,6 +192,11 @@ void game_control_center_panel() {
 			}
 		}
 	}
+
+	// 检测被销毁的障碍物，绘制黑色图片进行擦除
+
+
+
 }
 
 /**
@@ -237,9 +247,14 @@ void game_control_loop() {
 	// 初始化玩家0的结构体
 	tank_player_init(&tankPlayer0, 0, 4*16+BOX_SIZE, 12*16+BOX_SIZE, 240, 137);
 
-	// 定时器初始化
+	// 主定时器初始化
 	clock_init(&mainTimer, 15); // 主窗口15ms刷新一次
-	clock_init(&tankPlayer0.mTankMoveTimer, tankPlayer0.mBulletSpeedDev[tankPlayer0.mTankLevel]); // 设置坦克移动定时器，定时移动固定距离
+
+	// 坦克移动定时器，定时移动固定距离，在主定时器外更新数据，主定时器内进行绘制
+	clock_init(&tankPlayer0.mTankMoveTimer, tankPlayer0.mMoveSpeedDev[tankPlayer0.mTankLevel]);
+
+	// 炮弹移动定时器
+	clock_init(&tankPlayer0.mBulletTimer, tankPlayer0.mBulletSpeedDev[tankPlayer0.mTankLevel]);
 
 	while (result != Fail) {
 		result = game_control_start_game();
@@ -313,8 +328,39 @@ GameResult game_control_start_game() {
 	}
 
 	// 判断是否在发射炮弹
-	if (GetAsyncKeyState('J') & 0x8000) {
+	if (GetAsyncKeyState('J') & 0x8000) {		
+		tankPlayer0.mBullet.dir = tankPlayer0.tankDir; // 跟发射炮弹时坦克的方向一致
+		tankPlayer0.mBullet.posX = tankPlayer0.tankPlayerX;
+		tankPlayer0.mBullet.posY = tankPlayer0.tankPlayerY;
+		tankPlayer0.mBullet.needDraw = true;
 		PlaySounds(S_SHOOT0);
+	}
+
+	// 根据炮弹定时器计算炮弹运动数据，然后在主定时器中进行绘制
+	if (tankPlayer0.mBullet.needDraw) { // 判断是否需要绘制炮弹
+		if (clock_is_timeout(&tankPlayer0.mBulletTimer)) {
+			switch (tankPlayer0.mBullet.dir) {
+			case DIR_LEFT: 
+				tankPlayer0.mBullet.posX -= tankPlayer0.mBullet.speed[tankPlayer0.mTankLevel];
+				break;
+			case DIR_UP:
+				tankPlayer0.mBullet.posY -= tankPlayer0.mBullet.speed[tankPlayer0.mTankLevel];
+				break;
+			case DIR_RIGHT:
+				tankPlayer0.mBullet.posX += tankPlayer0.mBullet.speed[tankPlayer0.mTankLevel];
+				break;
+			case DIR_DOWN:
+				tankPlayer0.mBullet.posY += tankPlayer0.mBullet.speed[tankPlayer0.mTankLevel];
+				break;
+			default:
+				break;
+			}
+			if (tankPlayer0.mBullet.posX <= 0 || tankPlayer0.mBullet.posX >= CENTER_WIDTH
+				|| tankPlayer0.mBullet.posY <= 0
+				|| tankPlayer0.mBullet.posY >= CENTER_HEIGHT) {
+				tankPlayer0.mBullet.needDraw = false;
+			}
+		}
 	}
 
 	return Victory;
