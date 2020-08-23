@@ -63,6 +63,7 @@ const char* map[] = { // 第一关地图数据，0空地、1深林、2冰、3墙、4河流、5石头
 		"00330033000333300033003300",
 		"00000000000300300000000000",
 		"00000000000300300000000000" };
+char map26x26[26][26] = { 0 }; // 用于存储每个地图格子状态
 
 /**
 	游戏界面资源初始化
@@ -88,6 +89,13 @@ void game_control_init() {
 	// 玩家图标
 	loadimage(&m12PImage, _T("./res/big/1P.gif"));		// 1P\2P图标
 	loadimage(&mPlayerTankIcoImage, _T("./res/big/playertank-ico.gif"));	// 玩家坦克图标
+
+	// 初始化地图
+	for (int i = 0; i < 26; i++) {
+		for (int j = 0; j < 26; j++) {
+			map26x26[i][j] = map[i][j] - '0';
+		}
+	}
 }
 
 /**
@@ -148,7 +156,7 @@ void game_control_center_panel() {
 	// 玩家四角星闪烁控制
 	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
 
-	// 绘制玩家坦克、出生保护环
+	// 绘制玩家坦克、出生保护环、炮弹运动
 	tank_player_draw_tank(&tankPlayer0);
 
 	// 绘制敌机
@@ -165,7 +173,7 @@ void game_control_center_panel() {
 		for (int j = 0; j < 26; j++) {
 			x = j * BOX_SIZE;
 			y = i * BOX_SIZE;
-			switch (map[i][j]-'0') {
+			switch (map26x26[i][j]) {
 			case _WALL:
 				BitBlt(center_hdc, x, y, BOX_SIZE, BOX_SIZE, GetImageHDC(&mWallImage), 0, 0, SRCCOPY);
 				break;
@@ -187,7 +195,7 @@ void game_control_center_panel() {
 	// 绘制森林，森林可以覆盖在坦克上
 	for (int i = 0; i < 26; i++) {
 		for (int j = 0; j < 26; j++) {
-			if ((map[i][j] - '0') == _FOREST) {
+			if (map26x26[i][j] == _FOREST) {
 				TransparentBlt(center_hdc, x, y, BOX_SIZE, BOX_SIZE, GetImageHDC(&mForestImage), 0, 0, BOX_SIZE, BOX_SIZE, 0x000000);
 			}
 		}

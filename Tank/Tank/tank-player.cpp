@@ -2,6 +2,7 @@
 #include "game-clock.h"
 
 extern HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
+extern char map26x26[26][26]; // 地图数据
 
 /**
 	对玩家坦克资源进行初始化
@@ -157,9 +158,14 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 	}
 
 	// 绘制玩家坦克炮弹
-	int dir = tankPlayer->mBullet.dir;
+	int dir = tankPlayer->mBullet.dir; // 炮弹方向
+	int bulletX = tankPlayer->mBullet.posX + tankPlayer->mBullet.bullet_bias[dir][0];
+	int bulletY = tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1];
+
+	// 炮弹遇到障碍物产生爆炸效果，并标记砖墙被清除
+
 	TransparentBlt(center_hdc,
-		tankPlayer->mBullet.posX+tankPlayer->mBullet.bullet_bias[dir][0], tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1],
+		bulletX, bulletY,
 		tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
 		GetImageHDC(&tankPlayer->mBullet.mImage[tankPlayer->mBullet.dir]),
 		0, 0,
@@ -171,22 +177,80 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 	玩家坦克基于定时器移动
 */
 void tank_player_move_by_tanktimer(TankPlayer* tankPlayer) {
+	int x = tankPlayer->tankPlayerX;
+	int y = tankPlayer->tankPlayerY;
+	bool result = false;
+
 	if (clock_is_timeout(&tankPlayer->mTankMoveTimer)) { // 坦克定时器时间到，才开始移动
 		switch (tankPlayer->tankDir) {
 		case DIR_LEFT:
-			tankPlayer->tankPlayerX += -1;
+			x += -1;
+			result = check_tank_can_pass(x, y); // 判断将要运动的位置是否可以继续前进
+			if (result) {
+				tankPlayer->tankPlayerX += -1;
+			}			
 			break;
 		case DIR_UP:
-			tankPlayer->tankPlayerY += -1;
+			y += -1;
+			result = check_tank_can_pass(x, y);
+			if (result) {
+				tankPlayer->tankPlayerY += -1;
+			}			
 			break;
 		case DIR_RIGHT:
-			tankPlayer->tankPlayerX += 1;
+			x += 1;
+			result = check_tank_can_pass(x, y);
+			if (result) {
+				tankPlayer->tankPlayerX += 1;
+			}			
 			break;
 		case DIR_DOWN:
-			tankPlayer->tankPlayerY += 1;
+			y += 1;
+			result = check_tank_can_pass(x, y);
+			if (result) {
+				tankPlayer->tankPlayerY += 1;
+			}			
 			break;
 		default:
 			break;
 		}
 	}
+}
+
+/**
+	判断玩家坦克是否可以通过某一个区域
+	tankX和tankY是坦克下一步要移动的坐标，如果不能同行则坐标不变
+*/
+bool check_tank_can_pass(int tankX, int tankY) {
+	int x1 = tankX - BOX_SIZE;
+	int x2 = tankX + BOX_SIZE;
+	int y1 = tankY - BOX_SIZE;
+	int y2 = tankY + BOX_SIZE;
+
+	for (int i = 0; i < 26; i++) {
+		for (int j = 0; j < 26; j++) {
+			if (map26x26[i][j] == _WALL ||
+				map26x26[i][j] == _RIVER ||
+				map26x26[i][j] == _STONE) { // 如果是墙、河流、石头
+				int t_x1 = j * BOX_SIZE;
+				int t_x2 = j * BOX_SIZE + BOX_SIZE;
+				int t_y1 = i * BOX_SIZE;
+				int t_y2 = i * BOX_SIZE + BOX_SIZE;
+				// 是否地图的矩形和坦克的矩形满足不相交的条件（左右上下）:https://zhuanlan.zhihu.com/p/29704064
+				bool nonIntersect = (x2 <= t_x1+1) ||
+					(x1 >= t_x2-1) ||
+					(y2 <= t_y1+1) ||
+					(y1 >= t_y2-1);
+				if (nonIntersect == false) {
+					return false; // 说明两个矩形会相交
+				}				
+			}
+		}
+	}
+	
+	// 判断是否超过游戏地图边界
+	if (x1 < 0 || x2 > CENTER_WIDTH || y1 < 0 || y2 > CENTER_HEIGHT) {
+		return false;
+	}
+	return true;
 }

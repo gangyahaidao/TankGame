@@ -16,3 +16,6 @@ Tank/.vs/Tank/v16/.suo
 Tank/Tank/x64/Debug/game-control.obj
 Tank/Tank/x64/Debug/tank-player.obj
 *.obj
+*.tlog
+*.tlog
+*.obj
