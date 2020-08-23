@@ -19,3 +19,6 @@ Tank/Tank/x64/Debug/tank-player.obj
 *.tlog
 *.tlog
 *.obj
+*.db
+*.db
+*.obj

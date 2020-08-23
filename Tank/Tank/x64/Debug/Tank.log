@@ -1,5 +1,2 @@
-﻿  game-control.cpp
-  tank-common.cpp
-  tank-player.cpp
-  正在生成代码...
+﻿  tank-player.cpp
   Tank.vcxproj -> E:\ubuntu-sys\git\TankGame\Tank\x64\Debug\Tank.exe
