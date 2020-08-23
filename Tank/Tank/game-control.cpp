@@ -153,20 +153,6 @@ void game_control_show_stage() {
 void game_control_center_panel() {
 	BitBlt(center_hdc, 0, 0, CENTER_WIDTH, CENTER_HEIGHT, GetImageHDC(&mBlackBackgroundImage), 0, 0, SRCCOPY);// 中心黑色背景游戏区
 
-	// 玩家四角星闪烁控制
-	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
-
-	// 绘制玩家坦克、出生保护环、炮弹运动
-	tank_player_draw_tank(&tankPlayer0);
-
-	// 绘制敌机
-
-	
-	
-	// 绘制敌机炮弹
-
-
-
 	// 开始绘制地图
 	int x = 0, y = 0;
 	for (int i = 0; i < 26; i++) {
@@ -191,6 +177,12 @@ void game_control_center_panel() {
 			}
 		}
 	}
+
+	// 玩家四角星闪烁控制
+	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
+
+	// 绘制玩家坦克、出生保护环、炮弹运动，在地图之后绘制，炮弹有在河上飞过效果
+	tank_player_draw_tank(&tankPlayer0);
 
 	// 绘制森林，森林可以覆盖在坦克上
 	for (int i = 0; i < 26; i++) {
@@ -366,7 +358,15 @@ GameResult game_control_start_game() {
 			if (tankPlayer0.mBullet.posX <= 0 || tankPlayer0.mBullet.posX >= CENTER_WIDTH
 				|| tankPlayer0.mBullet.posY <= 0
 				|| tankPlayer0.mBullet.posY >= CENTER_HEIGHT) {
-				tankPlayer0.mBullet.needDraw = false;
+
+				tankPlayer0.mBullet.needDraw = false; // 停止绘制炮弹
+
+				// 如果是打在边界上则有爆炸效果和_BIN音效
+				tankPlayer0.mBombStruct.showBomb = true;
+				tankPlayer0.mBullet.needDraw = false; // 炮弹定时器停止计数
+				tankPlayer0.mBombStruct.mBombX = tankPlayer0.mBullet.posX;
+				tankPlayer0.mBombStruct.mBombY = tankPlayer0.mBullet.posY;
+				PlaySounds(S_BIN);				
 			}
 		}
 	}

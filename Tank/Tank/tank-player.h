@@ -36,8 +36,9 @@ struct TankPlayer {
 		mPlayerIconLife_y;
 
 	struct StarFourPoint mStar;			// 四角星闪烁类
-	ProtecCircle mProtecCircle;				// 保护圈类，四角星出现之后加载保护圈
+	ProtecCircle mProtecCircle;			// 保护圈类，四角星出现之后加载保护圈
 	BulletStruct mBullet;				// 炮弹类
+	BombStruct	mBombStruct;			// 爆炸类
 
 	int mMoveSpeedDev[4] = {21, 19, 17, 15};	// 四个级别坦克移动时间间隔
 	int mBulletSpeedDev[4] = {17, 16, 15, 14 };	// 不同级别子弹时间间隔速度
@@ -73,3 +74,8 @@ void tank_player_move_by_tanktimer(TankPlayer* tankPlayer);
 	tankX和tankY是坦克下一步要移动的坐标，如果不能同行则坐标不变
 */
 bool check_tank_can_pass(int tankX, int tankY);
+
+/**
+	发射炮弹撞击障碍物，遇到瓷砖则只爆炸，遇到红砖则爆炸并消除
+*/
+void check_bullet_to_obstacle(TankPlayer* tankPlayer);

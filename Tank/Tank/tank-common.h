@@ -24,6 +24,13 @@ typedef struct bullet_struct{
 	int mKillID; // 记录击中的玩家/敌机ID
 	IMAGE mImage[4]; // 炮弹图片资源
 	int bulletSize[4][2] = { {4, 3}, {3, 4}, {4, 3}, {3, 4} }; // 左右：4*3   上下：3*4   
-	int bullet_bias[4][2] = { {-BOX_SIZE, -1}, {-2, -BOX_SIZE}, {BOX_SIZE, -1}, {-2, BOX_SIZE} }; // 炮弹中心相对于坦克中心个方向的偏移量，用来绘制炮弹路径
+	int bullet_bias[4][2] = { {-BOX_SIZE, -1}, {-2, -BOX_SIZE}, {BOX_SIZE, -1}, {-2, BOX_SIZE} }; // 炮弹左上角相对于坦克中心个方向的偏移量，用来绘制炮弹路径
 	bool needDraw; // 是否需要在指定坐标绘制炮弹
 }BulletStruct;
+
+typedef struct bomb_struct {
+	IMAGE bombImage[3];
+	int mBombX, mBombY;						// 爆炸点中心坐标
+	bool showBomb;							// 是否开始显示爆炸图片
+	int bombCounter;						// 取模计数器, 多少次循环更换一张图片
+}BombStruct;

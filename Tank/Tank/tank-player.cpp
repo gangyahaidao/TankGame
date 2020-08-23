@@ -1,5 +1,6 @@
 #include "tank-player.h"
 #include "game-clock.h"
+#include "mci-sound.h"
 
 extern HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
 extern char map26x26[26][26]; // 地图数据
@@ -86,6 +87,15 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 		loadimage(&tankPlayer->mBullet.mImage[i], bulletBuf);
 	}
 	tankPlayer->mBullet.needDraw = false;
+
+	// 加载爆炸效果图片
+	for (int i = 0; i < 3; i++)
+	{
+		_stprintf_s(buf, _T("./res/big/bumb%d.gif"), i+1);
+		loadimage(&tankPlayer->mBombStruct.bombImage[i], buf);
+	}
+	tankPlayer->mBombStruct.bombCounter = 0;
+	tankPlayer->mBombStruct.showBomb = false;
 }
 
 /**
@@ -157,20 +167,39 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 		}		
 	}
 
-	// 绘制玩家坦克炮弹
-	int dir = tankPlayer->mBullet.dir; // 炮弹方向
-	int bulletX = tankPlayer->mBullet.posX + tankPlayer->mBullet.bullet_bias[dir][0];
-	int bulletY = tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1];
+	// 检查炮弹是否遇到障碍物
+	check_bullet_to_obstacle(tankPlayer);
+	// 炮弹遇到障碍物产生爆炸效果
+	if (tankPlayer->mBombStruct.showBomb) { // 需要显示爆炸效果
+		int index[6] = { 0,1,1,2,2,1 };	// 图片下标切换顺序
+		if (tankPlayer->mBombStruct.bombCounter >= 6) {
+			tankPlayer->mBombStruct.showBomb = false;
+			tankPlayer->mBombStruct.bombCounter = 0;
+		} else {
+			TransparentBlt(center_hdc,
+				tankPlayer->mBombStruct.mBombX - BOX_SIZE, tankPlayer->mBombStruct.mBombY - BOX_SIZE,
+				BOX_SIZE * 2, BOX_SIZE * 2,
+				GetImageHDC(&tankPlayer->mBombStruct.bombImage[index[tankPlayer->mBombStruct.bombCounter++]]),
+				0, 0,
+				BOX_SIZE * 2, BOX_SIZE * 2,
+				0x000000);
+		}
+	}
 
-	// 炮弹遇到障碍物产生爆炸效果，并标记砖墙被清除
-
-	TransparentBlt(center_hdc,
-		bulletX, bulletY,
-		tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
-		GetImageHDC(&tankPlayer->mBullet.mImage[tankPlayer->mBullet.dir]),
-		0, 0,
-		tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
-		0x000000);
+	// 炮弹是否需要绘制
+	if(tankPlayer->mBullet.needDraw) {
+		// 绘制玩家坦克炮弹
+		int dir = tankPlayer->mBullet.dir; // 炮弹方向
+		int bulletX = tankPlayer->mBullet.posX + tankPlayer->mBullet.bullet_bias[dir][0]; // 炮弹当前左上角的坐标
+		int bulletY = tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1];
+		TransparentBlt(center_hdc,
+			bulletX, bulletY,
+			tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
+			GetImageHDC(&tankPlayer->mBullet.mImage[tankPlayer->mBullet.dir]),
+			0, 0,
+			tankPlayer->mBullet.bulletSize[dir][0], tankPlayer->mBullet.bulletSize[dir][1],
+			0x000000);
+	}
 }
 
 /**
@@ -253,4 +282,49 @@ bool check_tank_can_pass(int tankX, int tankY) {
 		return false;
 	}
 	return true;
+}
+
+/**
+	发射炮弹撞击障碍物，遇到瓷砖则只爆炸，遇到红砖则爆炸并消除
+*/
+void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
+	if (tankPlayer->mBullet.needDraw == false) { // 如果没发射子弹不需要判断
+		return;
+	}
+	int bulletSize[4][2] = { {4, 3}, {3, 4}, {4, 3}, {3, 4} }; // 左右：4*3   上下：3*4   
+
+	int dir = tankPlayer->mBullet.dir;
+	int x1 = tankPlayer->mBullet.posX;
+	int y1 = tankPlayer->mBullet.posY;
+	int x2 = x1 + bulletSize[dir][0];
+	int y2 = y1 + bulletSize[dir][1];
+
+	bool nonIntersect = false;
+	for (int i = 0; i < 26; i++) {
+		for (int j = 0; j < 26; j++) {
+			if (map26x26[i][j] == _WALL ||
+				map26x26[i][j] == _STONE) { // 如果是墙、石头	
+				int t_x1 = j * BOX_SIZE;
+				int t_x2 = j * BOX_SIZE + BOX_SIZE;
+				int t_y1 = i * BOX_SIZE;
+				int t_y2 = i * BOX_SIZE + BOX_SIZE;
+				// 是否地图的矩形和炮弹的矩形满足不相交的条件（左右上下）:https://zhuanlan.zhihu.com/p/29704064
+				nonIntersect = (x2 <= t_x1) ||
+					(x1 >= t_x2) ||
+					(y2 <= t_y1) ||
+					(y1 >= t_y2); // ==true说明不相交  ==false说明相交
+				
+				if (nonIntersect == false) {
+					tankPlayer->mBombStruct.showBomb = true;
+					tankPlayer->mBullet.needDraw = false; // 炮弹定时器停止计数
+					tankPlayer->mBombStruct.mBombX = (x1 + x2) / 2;
+					tankPlayer->mBombStruct.mBombY = (y1 + y2) / 2;
+					if (map26x26[i][j] == _WALL) { // 爆炸并设置清除标志
+						map26x26[i][j] = _EMPTY; // 设置为空地
+					}
+					return;
+				}
+			}
+		}
+	}	
 }
