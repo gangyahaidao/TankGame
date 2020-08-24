@@ -18,7 +18,7 @@ struct StarFourPoint {
 };
 
 typedef struct bullet_struct{
-	int posX, posY; // 炮弹当前坐标
+	int posX, posY; // 炮弹当前左上角坐标值
 	int dir; // 炮弹方向
 	int speed[4] = {2, 3, 3, 4}; // 坦克不同级别对用不同的子弹速度，但是每次移动不跨过4个像素点，不然会有击中BUG
 	int mKillID; // 记录击中的玩家/敌机ID

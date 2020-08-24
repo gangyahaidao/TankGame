@@ -3,8 +3,6 @@
 #include "tank-common.h"
 #include "game-clock.h"
 
-#define BOMB_SPEED 20 // 炮弹爆炸速度
-
 enum TANK_DIR {
 	DIR_LEFT,
 	DIR_UP,
@@ -44,7 +42,6 @@ struct TankPlayer {
 	int mBulletSpeedDev[4] = {17, 16, 15, 14 };	// 不同级别子弹时间间隔速度
 	TimeClock mTankMoveTimer;		// 坦克移动速度
 	TimeClock mBulletTimer;		// 子弹移动速度
-	TimeClock mBombTimer;		// 子弹爆炸速度	
 };
 
 /**

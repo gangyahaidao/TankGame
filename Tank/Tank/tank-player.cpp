@@ -77,7 +77,6 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	// 初始化坦克移动、子弹速度、爆炸速度计数器
 	clock_init(&tankPlayer->mTankMoveTimer, tankPlayer->mMoveSpeedDev[tankPlayer->mTankLevel]);
 	clock_init(&tankPlayer->mBulletTimer, tankPlayer->mBulletSpeedDev[tankPlayer->mTankLevel]);
-	clock_init(&tankPlayer->mBombTimer, BOMB_SPEED);
 
 	// 加载炮弹图片资源
 	TCHAR bulletBuf[100];
@@ -190,7 +189,7 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 	if(tankPlayer->mBullet.needDraw) {
 		// 绘制玩家坦克炮弹
 		int dir = tankPlayer->mBullet.dir; // 炮弹方向
-		int bulletX = tankPlayer->mBullet.posX + tankPlayer->mBullet.bullet_bias[dir][0]; // 炮弹当前左上角的坐标
+		int bulletX = tankPlayer->mBullet.posX + tankPlayer->mBullet.bullet_bias[dir][0]; // 将炮弹左上角的位置由坦克的中心移动到坦克炮管的位置
 		int bulletY = tankPlayer->mBullet.posY + tankPlayer->mBullet.bullet_bias[dir][1];
 		TransparentBlt(center_hdc,
 			bulletX, bulletY,
@@ -288,16 +287,33 @@ bool check_tank_can_pass(int tankX, int tankY) {
 	发射炮弹撞击障碍物，遇到瓷砖则只爆炸，遇到红砖则爆炸并消除
 */
 void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
-	if (tankPlayer->mBullet.needDraw == false) { // 如果没发射子弹不需要判断
+	if (tankPlayer->mBullet.needDraw == false) { // 如果没发射子弹不需要继续判断
 		return;
 	}
 	int bulletSize[4][2] = { {4, 3}, {3, 4}, {4, 3}, {3, 4} }; // 左右：4*3   上下：3*4   
 
 	int dir = tankPlayer->mBullet.dir;
-	int x1 = tankPlayer->mBullet.posX;
+	int x1 = tankPlayer->mBullet.posX; // 炮弹左上角的坐标(x1, y1)
 	int y1 = tankPlayer->mBullet.posY;
 	int x2 = x1 + bulletSize[dir][0];
 	int y2 = y1 + bulletSize[dir][1];
+
+	switch (dir) { // 扩大炮弹不同方向的横截面，这样可以同时消掉两个砖块
+	case DIR_LEFT:
+		y1 = y1 - bulletSize[dir][1];
+		break;
+	case DIR_UP:
+		x1 = x1 - bulletSize[dir][0];
+		break;
+	case DIR_RIGHT:
+		y1 = y1 - bulletSize[dir][1];
+		break;
+	case DIR_DOWN:
+		x1 = x1 - bulletSize[dir][0];
+		break;
+	default:
+		break;
+	}
 
 	bool nonIntersect = false;
 	for (int i = 0; i < 26; i++) {
@@ -322,7 +338,6 @@ void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
 					if (map26x26[i][j] == _WALL) { // 爆炸并设置清除标志
 						map26x26[i][j] = _EMPTY; // 设置为空地
 					}
-					return;
 				}
 			}
 		}
