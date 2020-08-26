@@ -7,14 +7,22 @@ extern int mTotalOutEnemyTank; // 累计已经出现的敌机坦克
 extern HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
 extern char map26x26[26][26]; // 地图数据
 
+int add_enemy_counter = 0;
+
 /**
 	增加一个敌机坦克
 */
 void tank_enemy_add() {
-	if (mCurEnemyTankNum >= 6 || mTotalOutEnemyTank >= 20) { // 当前不需要增加坦克
+	if (add_enemy_counter++ % 100 != 0) { // 每隔100*15ms出现一辆坦克
 		return;
 	}
+	add_enemy_counter = 0;
 	
+	if (mCurEnemyTankNum >= 6 || mTotalOutEnemyTank >= 20 || (mCurEnemyTankNum + mTotalOutEnemyTank) >= 20) { // 当前不需要增加坦克
+		return;
+	}
+	printf("before mTotalOutEnemyTank = %d, curOut = %d\n", mTotalOutEnemyTank, mCurEnemyTankNum);
+
 	TankEnemy* pTankEnemy = &tankEnemyArr[mTotalOutEnemyTank]; // 获取当前要操作的数组中坦克对象
 	
 	pTankEnemy->mDied = false; // 未挂
@@ -94,6 +102,7 @@ void tank_enemy_add() {
 
 	mCurEnemyTankNum++;
 	mTotalOutEnemyTank++; // 最后将出现的坦克总数+1
+	printf("mTotalOutEnemyTank = %d, curOut = %d\n", mTotalOutEnemyTank, mCurEnemyTankNum);
 }
 
 /**
@@ -119,7 +128,7 @@ void tank_enemy_show_star() {
 			}
 			if (pTankEnemy->mStar.mStarCounter++ > 25) {
 				pTankEnemy->mStar.starState = Star_End; // 四角星闪烁完成
-				return;
+				continue;
 			}
 
 			// 按照计算的下标进行四角星图片绘制

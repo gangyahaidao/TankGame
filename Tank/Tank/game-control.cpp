@@ -226,7 +226,7 @@ void game_control_right_panel() {
 	StretchBlt(canvas_hdc, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, GetImageHDC(&mGrayBackgroundImage), 0, 0, 66, 66, SRCCOPY);
 
 	// 显示剩余敌机的图标
-	for (int i = 0; i < mRemainEnemyTankNumber; i++) {
+	for (int i = 0; i < MAX_TANK_ENEMY- mTotalOutEnemyTank; i++) {
 		int x = i % 2 == 0 ? 233 : 241; // 计算敌机图标x坐标
 		TransparentBlt(canvas_hdc, x, 19 + i / 2 * 8, ENEMY_TANK_ICO_SIZE, ENEMY_TANK_ICO_SIZE,
 			GetImageHDC(&mEnemyTankIcoImage), 0, 0, ENEMY_TANK_ICO_SIZE, ENEMY_TANK_ICO_SIZE, 0xffffff);
@@ -349,7 +349,7 @@ GameResult game_control_start_game() {
 		PlaySounds(S_SHOOT0);
 	}
 
-	// 根据炮弹定时器计算炮弹运动数据，然后在主定时器中进行绘制
+	// 根据玩家炮弹定时器计算炮弹运动数据，然后在主定时器中进行绘制
 	if (tankPlayer0.mBullet.needDraw) { // 判断是否需要绘制炮弹
 		if (clock_is_timeout(&tankPlayer0.mBulletTimer)) { // 玩家坦克级别不同，炮弹速度不一样
 			switch (tankPlayer0.mBullet.dir) {
@@ -388,7 +388,7 @@ GameResult game_control_start_game() {
 	for (int i = 0; i < mTotalOutEnemyTank; i++) {
 		TankEnemy* pTankEnemy = &tankEnemyArr[i];
 		
-		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true) {
+		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true && pTankEnemy->mStar.starState == Star_End) { // 如果敌机坦克活着且闪烁完毕
 			// 定时移动随机步数，定时时间到或者遇到障碍物重新调整方向
 			if (clock_is_timeout(&pTankEnemy->mTankMoveTimer)) { // 如果敌机活着且已经出生且定时移动时间到
 

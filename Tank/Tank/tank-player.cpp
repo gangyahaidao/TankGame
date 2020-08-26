@@ -379,6 +379,9 @@ void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
 				pTankEnemy->mBlastStruct.blastX = pTankEnemy->mTankX; // 敌机坦克中心位置
 				pTankEnemy->mBlastStruct.blastY = pTankEnemy->mTankY;
 				mCurEnemyTankNum -= 1; // 界面上存在坦克数量-1
+				if (mTotalOutEnemyTank >= 14) { // 总数到达14个时，已经不会有新的坦克出现，总数才进行+1操作
+					mTotalOutEnemyTank += 1;
+				}
 
 				PlaySounds(S_ENEMY_BOMB); // 敌机爆炸音效
 			}
