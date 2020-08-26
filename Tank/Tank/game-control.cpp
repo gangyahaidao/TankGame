@@ -101,9 +101,7 @@ void game_control_init() {
 
 	// 玩家图标
 	loadimage(&m12PImage, _T("./res/big/1P.gif"));		// 1P\2P图标
-	loadimage(&mPlayerTankIcoImage, _T("./res/big/playertank-ico.gif"));	// 玩家坦克图标
-
-	mCampDie = false;
+	loadimage(&mPlayerTankIcoImage, _T("./res/big/playertank-ico.gif"));	// 玩家坦克图标	
 
 	// 初始化地图
 	for (int i = 0; i < 26; i++) {
@@ -111,6 +109,10 @@ void game_control_init() {
 			map26x26[i][j] = map[i][j] - '0';
 		}
 	}
+
+	mCampDie = false;
+	mCurEnemyTankNum = 0; // 当前界面中出现的坦克数量
+	mTotalOutEnemyTank = 0; // 累计已经出现的敌机坦克
 }
 
 /**

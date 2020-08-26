@@ -26,3 +26,7 @@ Tank/Tank/x64/Debug/tank-player.obj
 *.tlog
 *.ipch
 *.pdb
+*.tlog
+*.log
+*.ipch
+*.ilk
