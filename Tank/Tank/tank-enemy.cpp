@@ -11,6 +11,10 @@ extern char map26x26[26][26]; // 地图数据
 extern TankPlayer tankPlayer0; // 定义玩家坦克结构
 
 int add_enemy_counter = 0;
+extern bool mCampDie;	// 大本营是否被击中
+extern bool showCampBomb;      // 显示大本营被击中爆炸效果
+extern int gameOverCounter;
+extern int gameOverX, gameOverY;		// 图片左上角坐标
 
 /**
 	增加一个敌机坦克
@@ -398,6 +402,26 @@ void check_enemy_bullet_to_obstacle(TankEnemy* pTankEnemy) {
 			tankPlayer0.mBlastStruct.showBlast = true;
 
 			PlaySounds(S_PLAYER_BOMB); // 玩家坦克爆炸音效
+		}
+	}
+
+	// 判断是否击中大本营
+	if (mCampDie == false) { // 如果大本营没有被击中才进行判断
+		int camp_x1 = BOX_SIZE * 12;
+		int camp_y1 = BOX_SIZE * 24;
+		int camp_x2 = camp_x1 + BOX_SIZE * 2;
+		int camp_y2 = camp_y1 + BOX_SIZE * 2;
+		nonIntersect = (x2 <= camp_x1) ||
+			(x1 >= camp_x2) ||
+			(y2 <= camp_y1) ||
+			(y1 >= camp_y2);
+		if (nonIntersect == false) {
+			mCampDie = true;
+			showCampBomb = true;
+			gameOverCounter = 0;
+			gameOverX = CENTER_WIDTH / 2 - GAME_OVER_WIDTH / 2;
+			gameOverY = CENTER_HEIGHT;
+			PlaySounds(S_CAMP_BOMB);
 		}
 	}
 }

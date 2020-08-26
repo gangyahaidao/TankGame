@@ -17,7 +17,7 @@ void game_control_show_stage();
 /**
 	开始游戏循环体：进行界面玩家、子弹、敌机、其他所有信息的更新
 */
-GameResult game_control_start_game();
+void game_control_start_game();
 
 /**
 	更新右边的分数关卡等数据

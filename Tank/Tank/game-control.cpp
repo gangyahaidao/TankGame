@@ -10,6 +10,8 @@ extern IMAGE mBlackNumberImage;		// 0123456789 当前关卡数
 
 extern TimeClock mainTimer; // 用于主窗口程序的界面定时绘制
 
+GameResult result = Victory; // 游戏结果，用来做关卡重新开始循环条件
+
 IMAGE center_img; // 用于保持center_hdc存在的有效性
 HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
 
@@ -22,6 +24,12 @@ IMAGE mRiverImage[2];			// 河流
 IMAGE mWallImage;				// 泥墙
 IMAGE mCamp[2];					// 大本营
 bool mCampDie;					// 大本营是否被击中
+bool showCampBomb = false;      // 显示大本营被击中爆炸效果
+int campBombCounter = 0;
+
+bool showGameOver = false;      // 上升显示Game Over字样
+int gameOverCounter = 0;
+int gameOverX, gameOverY;		// 图片左上角坐标
 
 IMAGE mEnemyTankIcoImage;		// 敌机坦克图标
 IMAGE mFlagImage;				// 旗子
@@ -113,9 +121,10 @@ void game_control_show_stage() {
 	PlaySounds(S_START); 
 
 	// 上下合拢特效
-	StretchBlt(canvas_hdc, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 
-		GetImageHDC(&mGrayBackgroundImage), 0, 0, 66, 66, SRCCOPY); // 灰色背景贴图
-	
+	StretchBlt(canvas_hdc, 
+		0, 0, CANVAS_WIDTH, CANVAS_HEIGHT, 
+		GetImageHDC(&mGrayBackgroundImage), 
+		0, 0, 66, 66, SRCCOPY); // 灰色背景贴图
 	int mCutStageCounter = 0;
 	while (mCutStageCounter < 110) {
 		Sleep(6);
@@ -216,6 +225,38 @@ void game_control_center_panel() {
 		0, 0,
 		BOX_SIZE * 2, BOX_SIZE * 2,
 		0x000000);
+	// 如果大本营被击毁，则显示大爆炸效果，同时升起"Game Over"字样
+	if (showCampBomb) {
+		int index[26] = { 0,0,0,0,1,1,1,2,2,2,3,3,3,4,4,4,4,4,3,3,2,2,1,1,0,0 };
+		TransparentBlt(center_hdc, 10 * BOX_SIZE + BOX_SIZE, 22 * BOX_SIZE + BOX_SIZE, 
+			BOX_SIZE * 4, BOX_SIZE * 4,
+			GetImageHDC(&tankPlayer0.mBlastStruct.blastImage[campBombCounter++]), // 借用一下玩家坦克大爆炸的图片
+			0, 0, 
+			BOX_SIZE * 4, BOX_SIZE * 4, 
+			0x000000);
+		if (campBombCounter >= 26) {
+			campBombCounter = 0;
+			showCampBomb = false;
+			showGameOver = true; // 开始显示GameOver
+		}
+	}
+	
+	if (showGameOver) {		
+		gameOverCounter++;
+		if (gameOverCounter <= 120) {
+			gameOverY -= 1;
+		}
+		else if (gameOverCounter >= 220) { // 停留约1秒
+			gameOverCounter = 0;
+			showGameOver = false;
+			result = Fail; // 游戏结束，开始重新选择
+		}
+		StretchBlt(center_hdc,
+			gameOverX, gameOverY, GAME_OVER_WIDTH, GAME_OVER_HEIGHT,
+			GetImageHDC(&mGameOverImage),
+			0, 0, GAME_OVER_WIDTH, GAME_OVER_HEIGHT, SRCCOPY);
+	}
+	
 }
 
 /**
@@ -260,9 +301,8 @@ void game_control_right_panel() {
 /**
 	开始游戏循环体
 */
-void game_control_loop() {
-	GameResult result = Victory;
-
+void game_control_loop() {	
+	result = Victory;
 	// 初始化玩家0的结构体
 	tank_player_init(&tankPlayer0, 0, 4*16+BOX_SIZE, 12*16+BOX_SIZE, 240, 137);
 
@@ -270,7 +310,7 @@ void game_control_loop() {
 	clock_init(&mainTimer, 15); // 主窗口15ms刷新一次
 
 	while (result != Fail) {
-		result = game_control_start_game();
+		game_control_start_game();
 		Sleep(1);
 	}
 }
@@ -278,17 +318,13 @@ void game_control_loop() {
 /**
 	进行界面玩家、子弹、敌机、其他所有信息的更新
 */
-GameResult game_control_start_game() {
+void game_control_start_game() {
 	if (clock_is_timeout(&mainTimer)) {
 		// 绘制中间游戏区域
 		game_control_center_panel();
 
 		// 绘制右边信息栏
 		game_control_right_panel();
-
-		// 胜利或者失败，显示分数面板
-
-		// 如果失败，上升GAME OVER字样
 
 		// 添加敌机坦克，只初始化资源，并不进行绘制
 		tank_enemy_add();
@@ -463,6 +499,4 @@ GameResult game_control_start_game() {
 			}
 		}		
 	}
-
-	return Victory;
 }
