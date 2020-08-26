@@ -34,3 +34,10 @@ typedef struct bomb_struct {
 	bool showBomb;							// 是否开始显示爆炸图片
 	int bombCounter;						// 取模计数器, 多少次循环更换一张图片
 }BombStruct;
+
+typedef struct blast_struct {
+	IMAGE blastImage[5];
+	int blastX, blastY;
+	int blastCounter = 0; // 定时器计数，切换图片
+	bool showBlast; // 是否绘制大爆炸
+}BlastStruct;

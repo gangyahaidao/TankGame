@@ -32,11 +32,12 @@ typedef struct tank_enemy {
 	IMAGE mTankImage[4][2]; // 给坦克随机分配一个型号，每个型号四个方向，每个方向两个图像
 	int mTankImageDirIndex; // 用于坦克行走图片下标切换
 
-	IMAGE mScoreImage; // 敌机爆炸之后显示的分数，100、200、300、400
+	IMAGE mScoreImage[4]; // 敌机爆炸之后显示的分数，100、200、300、400
 
 	struct StarFourPoint mStar; // 出生四角星
 	BulletStruct mBullet; // 子弹结构体
 	BombStruct mBombStruct; // 爆炸效果
+	BlastStruct mBlastStruct; // 被击中大爆炸效果
 
 	TimeClock mBulletTimer; // 控制子弹移动速度
 	TimeClock mTankMoveTimer; // 坦克移动速度

@@ -21,6 +21,7 @@ IMAGE mIceImage;				// 冰块
 IMAGE mRiverImage[2];			// 河流
 IMAGE mWallImage;				// 泥墙
 IMAGE mCamp[2];					// 大本营
+bool mCampDie;					// 大本营是否被击中
 
 IMAGE mEnemyTankIcoImage;		// 敌机坦克图标
 IMAGE mFlagImage;				// 旗子
@@ -93,6 +94,8 @@ void game_control_init() {
 	// 玩家图标
 	loadimage(&m12PImage, _T("./res/big/1P.gif"));		// 1P\2P图标
 	loadimage(&mPlayerTankIcoImage, _T("./res/big/playertank-ico.gif"));	// 玩家坦克图标
+
+	mCampDie = false;
 
 	// 初始化地图
 	for (int i = 0; i < 26; i++) {
@@ -200,6 +203,19 @@ void game_control_center_panel() {
 			}
 		}
 	}
+
+	// 绘制大本营
+	int campIndex = 0;
+	if (mCampDie) {
+		campIndex = 1;
+	}
+	TransparentBlt(center_hdc,
+		BOX_SIZE * 12, BOX_SIZE * 24,
+		BOX_SIZE * 2, BOX_SIZE * 2,
+		GetImageHDC(&mCamp[campIndex]),
+		0, 0,
+		BOX_SIZE * 2, BOX_SIZE * 2,
+		0x000000);
 }
 
 /**
@@ -376,7 +392,7 @@ GameResult game_control_start_game() {
 			// 定时移动随机步数，定时时间到或者遇到障碍物重新调整方向
 			if (clock_is_timeout(&pTankEnemy->mTankMoveTimer)) { // 如果敌机活着且已经出生且定时移动时间到
 
-				//计时器，一定随机时候后回头射击
+				//计时器，一定随机时候后回头射击，待实现
 
 				// 随机移动一定步数，活着遇到障碍物再变换方向并重新开始计算
 				if (pTankEnemy->mMoveStep-- < 0) {
@@ -450,7 +466,6 @@ GameResult game_control_start_game() {
 			}
 		}		
 	}
-
 
 	return Victory;
 }

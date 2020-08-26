@@ -1,9 +1,14 @@
 #include "tank-player.h"
 #include "game-clock.h"
 #include "mci-sound.h"
+#include "tank-enemy.h"
 
 extern HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
 extern char map26x26[26][26]; // 地图数据
+
+extern TankEnemy tankEnemyArr[MAX_TANK_ENEMY];
+extern int mCurEnemyTankNum; // 当前界面中出现的坦克数量
+extern int mTotalOutEnemyTank; // 累计已经出现的敌机坦克
 
 /**
 	对玩家坦克资源进行初始化
@@ -320,6 +325,7 @@ void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
 		break;
 	}
 
+	// 检测是否击中障碍物
 	bool nonIntersect = false;
 	for (int i = 0; i < 26; i++) {
 		for (int j = 0; j < 26; j++) {
@@ -346,5 +352,36 @@ void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
 				}
 			}
 		}
+	}	
+
+	// 检测是否击中敌机坦克
+	for (int i = 0; i < mTotalOutEnemyTank; i++) {
+		TankEnemy* pTankEnemy = &tankEnemyArr[i];
+		
+		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true) { // 只检测那些活着，且已经出生的坦克
+			nonIntersect = false;
+			int tank_x1 = pTankEnemy->mTankX - BOX_SIZE;
+			int tank_y1 = pTankEnemy->mTankY - BOX_SIZE;
+			int tank_x2 = pTankEnemy->mTankX + BOX_SIZE;
+			int tank_y2 = pTankEnemy->mTankY + BOX_SIZE;
+			nonIntersect = (x2 <= tank_x1) ||
+				(x1 >= tank_x2) ||
+				(y2 <= tank_y1) ||
+				(y1 >= tank_y2);
+			if (nonIntersect == false) { // 说明炮弹与敌机坦克相交
+				tankPlayer->mBombStruct.showBomb = true; // 显示爆炸效果
+				tankPlayer->mBullet.needDraw = false; // 炮弹停止运动
+				tankPlayer->mBombStruct.mBombX = (x1 + x2) / 2;
+				tankPlayer->mBombStruct.mBombY = (y1 + y2) / 2;
+
+				pTankEnemy->mDied = true; // 标识敌机被击中
+				pTankEnemy->mBlastStruct.showBlast = true;
+				pTankEnemy->mBlastStruct.blastX = pTankEnemy->mTankX; // 敌机坦克中心位置
+				pTankEnemy->mBlastStruct.blastY = pTankEnemy->mTankY;
+				mCurEnemyTankNum -= 1; // 界面上存在坦克数量-1
+
+				PlaySounds(S_ENEMY_BOMB); // 敌机爆炸音效
+			}
+		}		
 	}	
 }

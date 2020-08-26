@@ -78,6 +78,20 @@ void tank_enemy_add() {
 	pTankEnemy->mBombStruct.bombCounter = 0;
 	pTankEnemy->mBombStruct.showBomb = false;
 
+	// 加载敌机被击中的大爆炸效果
+	pTankEnemy->mBlastStruct.showBlast = false;
+	for (int i = 0; i < 5; i++)
+	{
+		_stprintf_s(buf, _T("./res/big/blast/%d.gif"), i);
+		loadimage(&pTankEnemy->mBlastStruct.blastImage[i], buf);
+	}
+
+	// 加载敌机爆炸之后显示的分数资源
+	loadimage(&pTankEnemy->mScoreImage[0], _T("./res/big/100.gif"));
+	loadimage(&pTankEnemy->mScoreImage[1], _T("./res/big/200.gif"));
+	loadimage(&pTankEnemy->mScoreImage[2], _T("./res/big/300.gif"));
+	loadimage(&pTankEnemy->mScoreImage[3], _T("./res/big/400.gif"));
+
 	mCurEnemyTankNum++;
 	mTotalOutEnemyTank++; // 最后将出现的坦克总数+1
 }
@@ -126,7 +140,7 @@ void tank_enemy_draw_tank() {
 		TankEnemy* pTankEnemy = &tankEnemyArr[i];
 		if (pTankEnemy->mDied == false && 
 			pTankEnemy->mBorned == true &&
-			pTankEnemy->mStar.starState == Star_End) { // 处于活动状态且已经出现过四角星的坦克
+			pTankEnemy->mStar.starState == Star_End) { // 处于活着状态且已经出现过四角星的坦克
 			
 			pTankEnemy->mTankImageDirIndex = pTankEnemy->mTankImageDirIndex == 0 ? 1 : 0; // 切换坦克移动方向图片
 			IMAGE tankImg = pTankEnemy->mTankImage[pTankEnemy->dir][pTankEnemy->mTankImageDirIndex];
@@ -173,6 +187,37 @@ void tank_enemy_draw_tank() {
 					pTankEnemy->mBullet.bulletSize[dir][0], pTankEnemy->mBullet.bulletSize[dir][1],
 					0x000000);
 			}
+		}
+
+		// 敌机坦克死亡，绘制大爆炸效果
+		if (pTankEnemy->mDied == true && pTankEnemy->mBlastStruct.showBlast == true) {
+			int index[13] = { 0,1,1,2,2,3,3,4,4,3,2,1,0 };
+			if (pTankEnemy->mBlastStruct.blastCounter >= 12) {
+				if (pTankEnemy->mBlastStruct.blastCounter++ <= 18) {
+					// 绘制敌机坦克分数图片
+					TransparentBlt(center_hdc, 
+						pTankEnemy->mBlastStruct.blastX - 7, pTankEnemy->mBlastStruct.blastY - 3,
+						14, 7,
+						GetImageHDC(&pTankEnemy->mScoreImage[pTankEnemy->mTankLevel]), 
+						0, 0, 
+						14, 7, 
+						0x000000);
+				}
+				else {
+					pTankEnemy->mBlastStruct.blastCounter = 0;
+					pTankEnemy->mBlastStruct.showBlast = false;
+				}							
+			}
+			else {
+				TransparentBlt(center_hdc,
+					pTankEnemy->mBlastStruct.blastX - BOX_SIZE*2, pTankEnemy->mBlastStruct.blastY - BOX_SIZE*2,
+					BOX_SIZE * 4, BOX_SIZE * 4,
+					GetImageHDC(&pTankEnemy->mBlastStruct.blastImage[index[pTankEnemy->mBlastStruct.blastCounter++]]),
+					0, 0,
+					BOX_SIZE * 4, BOX_SIZE * 4,
+					0x000000);
+			}
+
 		}
 	}
 }
