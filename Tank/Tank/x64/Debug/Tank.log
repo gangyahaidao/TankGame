@@ -1,27 +1,2 @@
-﻿  common.cpp
-  game-clock.cpp
-E:\ubuntu-sys\git\TankGame\Tank\Tank\game-clock.cpp(14,51): warning C4244: “=”: 从“LONGLONG”转换到“double”，可能丢失数据
-  game-control.cpp
-  mci-sound.cpp
-  select-panel.cpp
-  tank-common.cpp
-  tank-enemy.cpp
-  tank-player.cpp
-  Tank.cpp
-  正在编译...
-  正在生成代码...
+﻿  tank-enemy.cpp
   Tank.vcxproj -> E:\ubuntu-sys\git\TankGame\Tank\x64\Debug\Tank.exe
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-common.h(18): warning C26495: 未初始化变量 StarFourPoint::mStarIndex。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-player.h(19): warning C26495: 未初始化变量 ProtecCircle::imageIndex。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-common.h(29): warning C26495: 未初始化变量 bullet_struct::posX。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-common.h(36): warning C26495: 未初始化变量 bomb_struct::mBombY。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-player.h(45): warning C26495: 未初始化变量 TankPlayer::mPlayerIconLife_y。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-common.h(43): warning C26495: 未初始化变量 blast_struct::showBlast。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-enemy.h(46): warning C26495: 未初始化变量 tank_enemy::tankModel。始终初始化成员变量(type.6)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-enemy.h(21): warning C26812: 枚举类型“ENE_TANK_DIR”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\game-control.cpp(264): warning C26812: 枚举类型“GameResult”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\select-panel.cpp(120): warning C26812: 枚举类型“EnumSelectResult”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-enemy.cpp(69): warning C26451: 算术溢出: 使用 4 字节值上的运算符 + ，然后将结果转换到 8 字节值。在调用运算符 + 之前将值强制转换为宽类型可避免溢出(io.2)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-enemy.cpp(248): warning C26812: 枚举类型“ENE_TANK_DIR”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\tank-player.cpp(52): warning C26812: 枚举类型“TANK_DIR”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。
-E:\ubuntu-sys\git\TankGame\Tank\Tank\Tank.cpp(29): warning C26812: 枚举类型“EnumSelectResult”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。

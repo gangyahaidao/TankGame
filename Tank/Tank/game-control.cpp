@@ -461,7 +461,6 @@ GameResult game_control_start_game() {
 						pTankEnemy->mBombStruct.mBombX = pTankEnemy->mBullet.posX;
 						pTankEnemy->mBombStruct.mBombY = pTankEnemy->mBullet.posY;
 					}
-
 				}
 			}
 		}		

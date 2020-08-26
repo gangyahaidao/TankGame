@@ -290,6 +290,28 @@ bool check_tank_can_pass(int tankX, int tankY) {
 	if (x1 < 0 || x2 > CENTER_WIDTH || y1 < 0 || y2 > CENTER_HEIGHT) {
 		return false;
 	}
+
+	// 判断是否遇到敌机坦克
+	bool nonIntersect = false;
+	for (int i = 0; i < mTotalOutEnemyTank; i++) {
+		TankEnemy* pTankEnemy = &tankEnemyArr[i];
+
+		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true) { // 只检测那些活着，且已经出生的坦克
+			nonIntersect = false;
+			int tank_x1 = pTankEnemy->mTankX - BOX_SIZE; // 敌机坦克矩形区域
+			int tank_y1 = pTankEnemy->mTankY - BOX_SIZE;
+			int tank_x2 = pTankEnemy->mTankX + BOX_SIZE;
+			int tank_y2 = pTankEnemy->mTankY + BOX_SIZE;
+			nonIntersect = (x2 <= tank_x1) ||
+				(x1 >= tank_x2) ||
+				(y2 <= tank_y1) ||
+				(y1 >= tank_y2);
+			if (nonIntersect == false) { // 说明玩家坦克与敌机坦克相交
+				return false;
+			}
+		}
+	}
+
 	return true;
 }
 

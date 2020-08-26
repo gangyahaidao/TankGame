@@ -1,11 +1,13 @@
 #include "common.h"
 #include "tank-enemy.h"
+#include "tank-player.h"
 
 extern TankEnemy tankEnemyArr[MAX_TANK_ENEMY];
 extern int mCurEnemyTankNum; // 当前界面中出现的坦克数量
 extern int mTotalOutEnemyTank; // 累计已经出现的敌机坦克
 extern HDC center_hdc; // 中间游戏区域，分开绘制方便进行更新
 extern char map26x26[26][26]; // 地图数据
+extern TankPlayer tankPlayer0; // 定义玩家坦克结构
 
 int add_enemy_counter = 0;
 
@@ -21,7 +23,6 @@ void tank_enemy_add() {
 	if (mCurEnemyTankNum >= 6 || mTotalOutEnemyTank >= 20 || (mCurEnemyTankNum + mTotalOutEnemyTank) >= 20) { // 当前不需要增加坦克
 		return;
 	}
-	printf("before mTotalOutEnemyTank = %d, curOut = %d\n", mTotalOutEnemyTank, mCurEnemyTankNum);
 
 	TankEnemy* pTankEnemy = &tankEnemyArr[mTotalOutEnemyTank]; // 获取当前要操作的数组中坦克对象
 	
@@ -102,7 +103,6 @@ void tank_enemy_add() {
 
 	mCurEnemyTankNum++;
 	mTotalOutEnemyTank++; // 最后将出现的坦克总数+1
-	printf("mTotalOutEnemyTank = %d, curOut = %d\n", mTotalOutEnemyTank, mCurEnemyTankNum);
 }
 
 /**
@@ -301,6 +301,20 @@ bool check_tank_enemy_can_pass(int dir, int tankX, int tankY) {
 	if (x1 < 0 || x2 > CENTER_WIDTH || y1 < 0 || y2 > CENTER_HEIGHT) {
 		return false;
 	}
+
+	// 检测敌机坦克是否与玩家坦克重合
+	int player_x1 = tankPlayer0.tankPlayerX - BOX_SIZE; // 玩家坦克坐标
+	int player_y1 = tankPlayer0.tankPlayerY - BOX_SIZE;
+	int player_x2 = tankPlayer0.tankPlayerX + BOX_SIZE;
+	int player_y2 = tankPlayer0.tankPlayerY + BOX_SIZE;
+	bool check_result = (x2 <= player_x1) ||
+					(x1 >= player_x2) ||
+					(y2 <= player_y1) ||
+					(y1 >= player_y2);
+	if (check_result == false) { // 说明与玩家坦克相撞
+		return false;
+	}
+
 	return true;
 }
 
