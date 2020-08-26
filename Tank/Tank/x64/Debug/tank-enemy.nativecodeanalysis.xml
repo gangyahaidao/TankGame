@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>E:\ubuntu-sys\git\TankGame\Tank\Tank\</FILEPATH>
+      <FILENAME>tank-enemy.cpp</FILENAME>
+      <LINE>69</LINE>
+      <COLUMN>52</COLUMN>
+    </SFA>
+    <DEFECTCODE>26451</DEFECTCODE>
+    <DESCRIPTION>算术溢出: 使用 4 字节值上的运算符 + ，然后将结果转换到 8 字节值。在调用运算符 + 之前将值强制转换为宽类型可避免溢出(io.2)。</DESCRIPTION>
+    <FUNCTION>tank_enemy_add</FUNCTION>
+    <DECORATED>?tank_enemy_add@@YAXXZ</DECORATED>
+    <FUNCLINE>15</FUNCLINE>
+    <PATH></PATH>
+  </DEFECT>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>E:\ubuntu-sys\git\TankGame\Tank\Tank\</FILEPATH>
+      <FILENAME>tank-enemy.cpp</FILENAME>
+      <LINE>248</LINE>
+      <COLUMN>18</COLUMN>
+    </SFA>
+    <DEFECTCODE>26812</DEFECTCODE>
+    <DESCRIPTION>枚举类型“ENE_TANK_DIR”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。</DESCRIPTION>
+    <FUNCTION>tank_enemy_rejust_direction</FUNCTION>
+    <DECORATED>?tank_enemy_rejust_direction@@YAXPEAUtank_enemy@@@Z</DECORATED>
+    <FUNCLINE>237</FUNCLINE>
+    <PATH></PATH>
+  </DEFECT>
+</DEFECTS>

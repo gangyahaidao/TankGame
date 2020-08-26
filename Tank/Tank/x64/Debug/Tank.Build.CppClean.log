@@ -3,8 +3,14 @@ e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\vc142.idb
 e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank.obj
 e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\mci-sound.obj
 e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\common.obj
-e:\ubuntu-sys\git\tankgame\tank\x64\debug\tank.ilk
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\select-panel.obj
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\game-control.obj
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\game-clock.obj
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank-player.obj
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank-common.obj
+e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank-enemy.obj
 e:\ubuntu-sys\git\tankgame\tank\x64\debug\tank.exe
+e:\ubuntu-sys\git\tankgame\tank\x64\debug\tank.ilk
 e:\ubuntu-sys\git\tankgame\tank\x64\debug\tank.pdb
 e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank.tlog\cl.command.1.tlog
 e:\ubuntu-sys\git\tankgame\tank\tank\x64\debug\tank.tlog\cl.read.1.tlog

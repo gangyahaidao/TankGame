@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<DEFECTS>
+  <DEFECT>
+    <SFA>
+      <FILEPATH>E:\ubuntu-sys\git\TankGame\Tank\Tank\</FILEPATH>
+      <FILENAME>select-panel.cpp</FILENAME>
+      <LINE>120</LINE>
+      <COLUMN>2</COLUMN>
+    </SFA>
+    <DEFECTCODE>26812</DEFECTCODE>
+    <DESCRIPTION>枚举类型“EnumSelectResult”未设定范围。相比于 "enum"，首选 "enum class" (Enum.3)。</DESCRIPTION>
+    <FUNCTION>show_select_panel</FUNCTION>
+    <DECORATED>?show_select_panel@@YA?AW4EnumSelectResult@@XZ</DECORATED>
+    <FUNCLINE>53</FUNCLINE>
+    <PATH></PATH>
+  </DEFECT>
+</DEFECTS>

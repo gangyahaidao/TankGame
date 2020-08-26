@@ -1,0 +1,2 @@
+E:\ubuntu-sys\git\TankGame\Tank\x64\Debug\Tank.exe.lastcodeanalysissucceeded
+E:\ubuntu-sys\git\TankGame\Tank\Tank\x64\Debug\NativeCodeAnalysis.read.1.tlog
