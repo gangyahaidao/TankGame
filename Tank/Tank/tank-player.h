@@ -68,7 +68,7 @@ void tank_player_move_by_tanktimer(TankPlayer* tankPlayer);
 
 /**
 	判断玩家坦克是否可以通过某一个区域
-	tankX和tankY是坦克下一步要移动的坐标，如果不能同行则坐标不变
+	tankX和tankY是坦克下一步要移动的坐标，如果不能通行则坐标不变
 */
 bool check_tank_can_pass(int tankX, int tankY);
 

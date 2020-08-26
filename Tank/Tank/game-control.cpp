@@ -2,6 +2,7 @@
 #include "game-control.h"
 #include "game-clock.h"
 #include "tank-player.h"
+#include "tank-enemy.h"
 
 extern HDC main_hdc, canvas_hdc;
 extern IMAGE mGrayBackgroundImage;		// 游戏灰色背景图
@@ -34,7 +35,10 @@ int mRemainEnemyTankNumber = 20;		// 余下未显示的敌机数量, 初始值=20, 出现一架敌
 int mPlayerLife = 3; // 玩家默认生命值为3
 int mCurrentStage = 1; // 当前关卡
 
-TankPlayer tankPlayer0;
+TankPlayer tankPlayer0; // 定义玩家坦克结构
+TankEnemy tankEnemyArr[MAX_TANK_ENEMY]; // 定义敌机坦克数组列表，后期可自行修改为链表结构
+int mCurEnemyTankNum = 0; // 当前界面中出现的坦克数量
+int mTotalOutEnemyTank = 0; // 累计已经出现的敌机坦克
 
 const char* map[] = { // 第一关地图数据，0空地、1深林、2冰、3墙、4河流、5石头
 		"00000000000000000000000000",
@@ -180,9 +184,13 @@ void game_control_center_panel() {
 
 	// 玩家四角星闪烁控制
 	tank_player_show_star(&tankPlayer0); // 四角星闪烁完成之后状态设置为Star_End
+	// 敌机坦克四角星闪烁
+	tank_enemy_show_star();
 
 	// 绘制玩家坦克、出生保护环、炮弹运动，在地图之后绘制，炮弹有在河上飞过效果
 	tank_player_draw_tank(&tankPlayer0);
+	// 绘制敌机坦克和炮弹
+	tank_enemy_draw_tank();
 
 	// 绘制森林，森林可以覆盖在坦克上
 	for (int i = 0; i < 26; i++) {
@@ -192,11 +200,6 @@ void game_control_center_panel() {
 			}
 		}
 	}
-
-	// 检测被销毁的障碍物，绘制黑色图片进行擦除
-
-
-
 }
 
 /**
@@ -250,12 +253,6 @@ void game_control_loop() {
 	// 主定时器初始化
 	clock_init(&mainTimer, 15); // 主窗口15ms刷新一次
 
-	// 坦克移动定时器，定时移动固定距离，在主定时器外更新数据，主定时器内进行绘制
-	clock_init(&tankPlayer0.mTankMoveTimer, tankPlayer0.mMoveSpeedDev[tankPlayer0.mTankLevel]);
-
-	// 炮弹移动定时器
-	clock_init(&tankPlayer0.mBulletTimer, tankPlayer0.mBulletSpeedDev[tankPlayer0.mTankLevel]);
-
 	while (result != Fail) {
 		result = game_control_start_game();
 		Sleep(1);
@@ -267,18 +264,18 @@ void game_control_loop() {
 */
 GameResult game_control_start_game() {
 	if (clock_is_timeout(&mainTimer)) {
+		// 绘制中间游戏区域
+		game_control_center_panel();
+
+		// 绘制右边信息栏
+		game_control_right_panel();
 
 		// 胜利或者失败，显示分数面板
 
 		// 如果失败，上升GAME OVER字样
 
-		// 添加敌机坦克
-
-		// 绘制中间游戏主体区域
-		game_control_center_panel();
-
-		// 绘制右边信息栏
-		game_control_right_panel();
+		// 添加敌机坦克，只初始化资源，并不进行绘制
+		tank_enemy_add();
 
 		// 将中间绘图区center_hdc绘制到画布canvas_hdc上
 		BitBlt(canvas_hdc, CENTER_X, CENTER_Y, CENTER_WIDTH, CENTER_HEIGHT, center_hdc, 0, 0, SRCCOPY);
@@ -327,8 +324,8 @@ GameResult game_control_start_game() {
 		PlaySounds(S_PLAYER_STOP_MOVE);
 	}
 
-	// 判断是否在发射炮弹
-	if (GetAsyncKeyState('J') & 0x8000) {		
+	// 判断是否按键J，且前一发炮弹已经爆炸
+	if (GetAsyncKeyState('J') & 0x8000 && tankPlayer0.mBullet.needDraw==false) {
 		tankPlayer0.mBullet.dir = tankPlayer0.tankDir; // 跟发射炮弹时坦克的方向一致
 		tankPlayer0.mBullet.posX = tankPlayer0.tankPlayerX;
 		tankPlayer0.mBullet.posY = tankPlayer0.tankPlayerY;
@@ -338,7 +335,7 @@ GameResult game_control_start_game() {
 
 	// 根据炮弹定时器计算炮弹运动数据，然后在主定时器中进行绘制
 	if (tankPlayer0.mBullet.needDraw) { // 判断是否需要绘制炮弹
-		if (clock_is_timeout(&tankPlayer0.mBulletTimer)) {
+		if (clock_is_timeout(&tankPlayer0.mBulletTimer)) { // 玩家坦克级别不同，炮弹速度不一样
 			switch (tankPlayer0.mBullet.dir) {
 			case DIR_LEFT: 
 				tankPlayer0.mBullet.posX -= tankPlayer0.mBullet.speed[tankPlayer0.mTankLevel];
@@ -363,13 +360,97 @@ GameResult game_control_start_game() {
 
 				// 如果是打在边界上则有爆炸效果和_BIN音效
 				tankPlayer0.mBombStruct.showBomb = true;
-				tankPlayer0.mBullet.needDraw = false; // 炮弹定时器停止计数
 				tankPlayer0.mBombStruct.mBombX = tankPlayer0.mBullet.posX;
 				tankPlayer0.mBombStruct.mBombY = tankPlayer0.mBullet.posY;
 				PlaySounds(S_BIN);				
 			}
 		}
 	}
+
+	// 绘制敌机坦克
+	// 敌机坦克自动随机方向移动
+	for (int i = 0; i < mTotalOutEnemyTank; i++) {
+		TankEnemy* pTankEnemy = &tankEnemyArr[i];
+		
+		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true) {
+			// 定时移动随机步数，定时时间到或者遇到障碍物重新调整方向
+			if (clock_is_timeout(&pTankEnemy->mTankMoveTimer)) { // 如果敌机活着且已经出生且定时移动时间到
+
+				//计时器，一定随机时候后回头射击
+
+				// 随机移动一定步数，活着遇到障碍物再变换方向并重新开始计算
+				if (pTankEnemy->mMoveStep-- < 0) {
+					pTankEnemy->mMoveStep = rand() % 250;
+					tank_enemy_rejust_direction(pTankEnemy); // 重新调整方向
+				}
+
+				if (check_tank_enemy_can_pass(pTankEnemy->dir, pTankEnemy->mTankX, pTankEnemy->mTankY) == true) { // 如果可以移动
+					switch (pTankEnemy->dir) {
+					case ENE_DIR_LEFT:
+						pTankEnemy->mTankX += -1;
+						break;
+					case ENE_DIR_UP:
+						pTankEnemy->mTankY += -1;
+						break;
+					case ENE_DIR_RIGHT:
+						pTankEnemy->mTankX += 1;
+						break;
+					case ENE_DIR_DOWN:
+						pTankEnemy->mTankY += 1;
+						break;
+					default:
+						break;
+					}
+				}
+				else { // 重新调整方向
+					tank_enemy_rejust_direction(pTankEnemy);
+				}
+			}
+
+			// 敌机坦克自动随机频率射击，且前一发炮弹已经爆炸
+			if (clock_is_timeout(&pTankEnemy->mShootTimer) && pTankEnemy->mBullet.needDraw == false) {
+				pTankEnemy->mBullet.dir = pTankEnemy->dir;
+				pTankEnemy->mBullet.posX = pTankEnemy->mTankX;
+				pTankEnemy->mBullet.posY = pTankEnemy->mTankY;
+				pTankEnemy->mBullet.needDraw = true; // 通知绘制函数中需要开始绘制炮弹，敌机发炮不播放音效
+			}
+
+			// 遍历更新需要绘制炮弹的坐标，如果打在边界上停止绘制，并通知绘制爆炸效果
+			if (pTankEnemy->mBullet.needDraw) {
+				if (clock_is_timeout(&pTankEnemy->mBulletTimer)) { // 敌机炮弹运行更新间隔时间都是30ms
+					switch (pTankEnemy->mBullet.dir) {
+					case DIR_LEFT:
+						pTankEnemy->mBullet.posX -= TANK_ENEMY_POS_SPEED;
+						break;
+					case DIR_UP:
+						pTankEnemy->mBullet.posY -= TANK_ENEMY_POS_SPEED;
+						break;
+					case DIR_RIGHT:
+						pTankEnemy->mBullet.posX += TANK_ENEMY_POS_SPEED;
+						break;
+					case DIR_DOWN:
+						pTankEnemy->mBullet.posY += TANK_ENEMY_POS_SPEED;
+						break;
+					default:
+						break;
+					}
+					if (pTankEnemy->mBullet.posX <= 0 || pTankEnemy->mBullet.posX >= CENTER_WIDTH
+						|| pTankEnemy->mBullet.posY <= 0
+						|| pTankEnemy->mBullet.posY >= CENTER_HEIGHT) {
+
+						pTankEnemy->mBullet.needDraw = false; // 停止绘制炮弹
+
+						// 如果是打在边界上只有爆炸效果
+						pTankEnemy->mBombStruct.showBomb = true;
+						pTankEnemy->mBombStruct.mBombX = pTankEnemy->mBullet.posX;
+						pTankEnemy->mBombStruct.mBombY = pTankEnemy->mBullet.posY;
+					}
+
+				}
+			}
+		}		
+	}
+
 
 	return Victory;
 }

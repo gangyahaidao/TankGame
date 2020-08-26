@@ -77,6 +77,10 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	// 初始化坦克移动、子弹速度、爆炸速度计数器
 	clock_init(&tankPlayer->mTankMoveTimer, tankPlayer->mMoveSpeedDev[tankPlayer->mTankLevel]);
 	clock_init(&tankPlayer->mBulletTimer, tankPlayer->mBulletSpeedDev[tankPlayer->mTankLevel]);
+	// 坦克移动定时器，定时移动固定距离，在主定时器外更新数据，主定时器内进行绘制
+	clock_init(&tankPlayer->mTankMoveTimer, tankPlayer->mMoveSpeedDev[tankPlayer->mTankLevel]);
+	// 炮弹移动定时器
+	clock_init(&tankPlayer->mBulletTimer, tankPlayer->mBulletSpeedDev[tankPlayer->mTankLevel]);
 
 	// 加载炮弹图片资源
 	TCHAR bulletBuf[100];
@@ -174,6 +178,7 @@ void tank_player_draw_tank(TankPlayer* tankPlayer) {
 		if (tankPlayer->mBombStruct.bombCounter >= 6) {
 			tankPlayer->mBombStruct.showBomb = false;
 			tankPlayer->mBombStruct.bombCounter = 0;
+			tankPlayer->mBullet.needDraw = false; // 前一发炮弹爆炸之后，再开始响应玩家新的发射炮弹请求
 		} else {
 			TransparentBlt(center_hdc,
 				tankPlayer->mBombStruct.mBombX - BOX_SIZE, tankPlayer->mBombStruct.mBombY - BOX_SIZE,
@@ -247,7 +252,7 @@ void tank_player_move_by_tanktimer(TankPlayer* tankPlayer) {
 
 /**
 	判断玩家坦克是否可以通过某一个区域
-	tankX和tankY是坦克下一步要移动的坐标，如果不能同行则坐标不变
+	tankX和tankY是坦克下一步要移动的坐标，如果不能通行则坐标不变
 */
 bool check_tank_can_pass(int tankX, int tankY) {
 	int x1 = tankX - BOX_SIZE;
