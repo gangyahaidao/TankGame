@@ -104,12 +104,57 @@ void tank_player_init(TankPlayer* tankPlayer, int playerID,
 	}
 	tankPlayer->mBombStruct.bombCounter = 0;
 	tankPlayer->mBombStruct.showBomb = false;
+
+	// 加载玩家被击中的大爆炸效果
+	tankPlayer->mBlastStruct.showBlast = false;
+	for (int i = 0; i < 5; i++)
+	{
+		_stprintf_s(buf, _T("./res/big/blast/%d.gif"), i);
+		loadimage(&tankPlayer->mBlastStruct.blastImage[i], buf);
+	}
+}
+
+/**		
+	玩家坦克进行重生
+*/
+void tank_player_reborn(TankPlayer* tankPlayer) {
+	tankPlayer->mDied = false;
+	tankPlayer->mTankLevel = 0; // 从0开始
+	tankPlayer->mTankMoving = false;
+
+	// 设置初始坐标点和长宽
+	tankPlayer->tankPlayerX = 4 * 16 + BOX_SIZE;
+	tankPlayer->tankPlayerY = 12 * 16 + BOX_SIZE;
+	tankPlayer->tankWidth = TANK_WIDTH;
+	tankPlayer->tankHeight = TANK_HEIGHT;
+	tankPlayer->tankDir = DIR_UP;
+
+	tankPlayer->mStar.starState = Star_Begin; // 四角星刚出现
+	tankPlayer->mStar.mStarCounter = 0;
+	tankPlayer->mStar.mStarIndex = 0;
+	tankPlayer->mStar.mStarIndexDir = 1; // 初始下标是由小变大
+
+	// 初始化保护环
+	tankPlayer->mProtecCircle.needShow = true;
+	tankPlayer->mProtecCircle.imageIndex = 0;
+	tankPlayer->mProtecCircle.timerCount = 0;
+
+	// 炮弹绘制初始化
+	tankPlayer->mBullet.needDraw = false;
+
+	// 加载爆炸初始化
+	tankPlayer->mBombStruct.bombCounter = 0;
+	tankPlayer->mBombStruct.showBomb = false;
+
+	// 加载玩家被击中的大爆炸效果
+	tankPlayer->mBlastStruct.blastCounter = 0;
+	tankPlayer->mBlastStruct.showBlast = false;
 }
 
 /**
 	玩家坦克四角星闪烁，只有在进入新关卡第一次时才会出现四角星，游戏中重生只会出现保护圈
 */
-void tank_player_show_star(TankPlayer* tankPlayer) {
+void tank_player_show_star(TankPlayer* tankPlayer) {	
 	if (tankPlayer->mStar.starState == Star_End) { // 如果坦克已经出现则不显示四角星
 		return;
 	}
@@ -141,6 +186,24 @@ void tank_player_show_star(TankPlayer* tankPlayer) {
 	绘制玩家坦克
 */
 void tank_player_draw_tank(TankPlayer* tankPlayer) {
+	// 玩家被击中，产生大爆炸，之后再进行重生
+	if (tankPlayer->mDied == true && tankPlayer->mBlastStruct.showBlast == true) {
+		int index[13] = { 0,1,1,2,2,3,3,4,4,3,2,1,0 };
+		if (tankPlayer->mBlastStruct.blastCounter >= 12) {
+			tank_player_reborn(tankPlayer); // 重生
+		}
+		else {
+			TransparentBlt(center_hdc,
+				tankPlayer->mBlastStruct.blastX - BOX_SIZE * 2, tankPlayer->mBlastStruct.blastY - BOX_SIZE * 2,
+				BOX_SIZE * 4, BOX_SIZE * 4,
+				GetImageHDC(&tankPlayer->mBlastStruct.blastImage[index[tankPlayer->mBlastStruct.blastCounter++]]),
+				0, 0,
+				BOX_SIZE * 4, BOX_SIZE * 4,
+				0x000000);
+		}
+		return; // 返回，不向下执行
+	}
+
 	if (tankPlayer->mStar.starState != Star_End) { // 如果还在绘制四角星则返回
 		return;
 	}

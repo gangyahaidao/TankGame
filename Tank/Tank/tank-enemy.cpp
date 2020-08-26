@@ -1,6 +1,7 @@
 #include "common.h"
 #include "tank-enemy.h"
 #include "tank-player.h"
+#include "mci-sound.h"
 
 extern TankEnemy tankEnemyArr[MAX_TANK_ENEMY];
 extern int mCurEnemyTankNum; // 当前界面中出现的坦克数量
@@ -375,6 +376,28 @@ void check_enemy_bullet_to_obstacle(TankEnemy* pTankEnemy) {
 					}
 				}
 			}
+		}
+	}
+
+	// 判断敌机炮弹是否击中玩家坦克
+	if (tankPlayer0.mStar.starState != Star_Begin && tankPlayer0.mProtecCircle.needShow == false) { // 如果当前玩家还处于四角星或者重生保护帽模式，则不能被击毁
+		int player_x1 = tankPlayer0.tankPlayerX - BOX_SIZE; // 玩家坦克坐标
+		int player_y1 = tankPlayer0.tankPlayerY - BOX_SIZE;
+		int player_x2 = tankPlayer0.tankPlayerX + BOX_SIZE;
+		int player_y2 = tankPlayer0.tankPlayerY + BOX_SIZE;
+		nonIntersect = (x2 <= player_x1) ||
+			(x1 >= player_x2) ||
+			(y2 <= player_y1) ||
+			(y1 >= player_y2);
+		if (nonIntersect == false) { // 说明炮弹击中玩家坦克		
+			// 玩家坦克中心位置产生大爆炸
+			tankPlayer0.mDied = true;
+			tankPlayer0.mPlayerLife -= 1; // 生命值-1
+			tankPlayer0.mBlastStruct.blastX = tankPlayer0.tankPlayerX;
+			tankPlayer0.mBlastStruct.blastY = tankPlayer0.tankPlayerY;
+			tankPlayer0.mBlastStruct.showBlast = true;
+
+			PlaySounds(S_PLAYER_BOMB); // 玩家坦克爆炸音效
 		}
 	}
 }

@@ -391,9 +391,6 @@ GameResult game_control_start_game() {
 		if (pTankEnemy->mDied == false && pTankEnemy->mBorned == true && pTankEnemy->mStar.starState == Star_End) { // 如果敌机坦克活着且闪烁完毕
 			// 定时移动随机步数，定时时间到或者遇到障碍物重新调整方向
 			if (clock_is_timeout(&pTankEnemy->mTankMoveTimer)) { // 如果敌机活着且已经出生且定时移动时间到
-
-				//计时器，一定随机时候后回头射击，待实现
-
 				// 随机移动一定步数，活着遇到障碍物再变换方向并重新开始计算
 				if (pTankEnemy->mMoveStep-- < 0) {
 					pTankEnemy->mMoveStep = rand() % 250;
@@ -450,6 +447,7 @@ GameResult game_control_start_game() {
 					default:
 						break;
 					}
+					// 炮弹超出边界
 					if (pTankEnemy->mBullet.posX <= 0 || pTankEnemy->mBullet.posX >= CENTER_WIDTH
 						|| pTankEnemy->mBullet.posY <= 0
 						|| pTankEnemy->mBullet.posY >= CENTER_HEIGHT) {
