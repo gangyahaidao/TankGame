@@ -10,6 +10,10 @@ extern TankEnemy tankEnemyArr[MAX_TANK_ENEMY];
 extern int mCurEnemyTankNum; // 当前界面中出现的坦克数量
 extern int mTotalOutEnemyTank; // 累计已经出现的敌机坦克
 
+extern bool showGameOver;      // 上升显示Game Over字样
+extern int gameOverCounter;
+extern int gameOverX, gameOverY;		// 图片左上角坐标
+
 /**
 	对玩家坦克资源进行初始化
 */
@@ -467,8 +471,15 @@ void check_bullet_to_obstacle(TankPlayer* tankPlayer) {
 				if (mTotalOutEnemyTank >= 14) { // 总数到达14个时，已经不会有新的坦克出现，总数才进行+1操作
 					mTotalOutEnemyTank += 1;
 				}
-
 				PlaySounds(S_ENEMY_BOMB); // 敌机爆炸音效
+
+				if (mCurEnemyTankNum <= 0) {
+					showGameOver = true;
+					gameOverCounter = 0;
+					gameOverX = CENTER_WIDTH / 2 - GAME_OVER_WIDTH / 2;
+					gameOverY = CENTER_HEIGHT;
+					PlaySounds(S_WIN);
+				}
 			}
 		}		
 	}	

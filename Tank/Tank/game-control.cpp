@@ -39,6 +39,7 @@ IMAGE mPlayerTankIcoImage;
 int mCutStageCounter;
 IMAGE mCurrentStageImage;		// STAGE 字样
 IMAGE mGameOverImage;			
+IMAGE mGameWinImage;
 int mRemainEnemyTankNumber = 20;		// 余下未显示的敌机数量, 初始值=20, 出现一架敌机该值减一
 
 int mPlayerLife = 3; // 玩家默认生命值为3
@@ -98,6 +99,7 @@ void game_control_init() {
 	loadimage(&mFlagImage, _T("./res/big/flag.gif"));					// 旗子
 	loadimage(&mCurrentStageImage, _T("./res/big/stage.gif"));
 	loadimage(&mGameOverImage, _T("./res/big/gameover.gif"));
+	loadimage(&mGameWinImage, _T("./res/big/flag.gif"));
 
 	// 玩家图标
 	loadimage(&m12PImage, _T("./res/big/1P.gif"));		// 1P\2P图标
@@ -253,10 +255,18 @@ void game_control_center_panel() {
 			showGameOver = false;
 			result = Fail; // 游戏结束，开始重新选择
 		}
-		StretchBlt(center_hdc,
-			gameOverX, gameOverY, GAME_OVER_WIDTH, GAME_OVER_HEIGHT,
-			GetImageHDC(&mGameOverImage),
-			0, 0, GAME_OVER_WIDTH, GAME_OVER_HEIGHT, SRCCOPY);
+		if (mCurEnemyTankNum <= 0) { // 如果是将所有敌机击毁赢，则显示GameWin
+			StretchBlt(center_hdc,
+				gameOverX, gameOverY, GAME_OVER_WIDTH, GAME_OVER_HEIGHT,
+				GetImageHDC(&mGameWinImage),
+				0, 0, GAME_OVER_WIDTH, GAME_OVER_HEIGHT, SRCCOPY);
+		}
+		else {
+			StretchBlt(center_hdc,
+				gameOverX, gameOverY, GAME_OVER_WIDTH, GAME_OVER_HEIGHT,
+				GetImageHDC(&mGameOverImage),
+				0, 0, GAME_OVER_WIDTH, GAME_OVER_HEIGHT, SRCCOPY);
+		}		
 	}
 	
 }
